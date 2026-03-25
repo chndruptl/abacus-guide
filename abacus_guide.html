@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abacus Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0e;
+    --surface: #161618;
+    --surface2: #1f1f22;
+    --border: #2a2a2e;
+    --text: #e8e4dc;
+    --text2: #8a8680;
+    --amber: #e8a040;
+    --amber-dark: #a06820;
+    --amber-glow: rgba(232,160,64,0.15);
+    --teal: #3bbfa0;
+    --teal-dark: #1a8070;
+    --teal-glow: rgba(59,191,160,0.12);
+    --accent: #e05a38;
+    --frame: #5c4a30;
+    --rod: #3a3530;
+    --bead-shadow: rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: 0.4;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .header::before {
+    content: '算盤';
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 80px;
+    opacity: 0.04;
+    letter-spacing: -4px;
+    font-family: 'Playfair Display', serif;
+    pointer-events: none;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .header h1 span { color: var(--amber); }
+  .header p {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* Tab nav */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 40px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--amber);
+    border: 1px solid var(--border);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── ABACUS ── */
+  .abacus-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .abacus-info {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .info-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .info-pill span { color: var(--amber); font-weight: 500; }
+
+  .abacus-frame {
+    background: linear-gradient(145deg, #3a2e1a, #2a2010);
+    border: 3px solid #6b5030;
+    border-radius: 14px;
+    padding: 16px 20px 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+    width: 100%;
+    max-width: 660px;
+    position: relative;
+  }
+
+  /* Top/bottom frame bars */
+  .frame-bar {
+    height: 14px;
+    background: linear-gradient(180deg, #7a6040, #4a3820);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    margin: 0 -4px;
+  }
+
+  .abacus-body {
+    display: flex;
+    gap: 0;
+    margin: 10px 0;
+    position: relative;
+  }
+
+  /* Reckoning bar */
+  .reckoning-bar {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 12px;
+    background: linear-gradient(180deg, #8a7050, #5a4030);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 4px 0;
+    cursor: pointer;
+    min-width: 0;
+  }
+
+  /* Rod */
+  .column::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 4px;
+    background: linear-gradient(180deg, #5a5048, #2a2820);
+    border-radius: 2px;
+    z-index: 1;
+  }
+
+  .upper-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 70px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+  }
+
+  .lower-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 120px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    gap: 2px;
+  }
+
+  .bead {
+    width: 82%;
+    max-width: 56px;
+    height: 22px;
+    border-radius: 11px;
+    position: relative;
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s;
+    cursor: pointer;
+    z-index: 3;
+    flex-shrink: 0;
+  }
+
+  .bead.upper {
+    background: linear-gradient(160deg, #f0c060, #c07820, #a05810);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.3);
+  }
+  .bead.upper.active {
+    background: linear-gradient(160deg, #ffe080, #e09030, #c06010);
+    box-shadow: 0 2px 16px var(--amber-glow), 0 0 20px var(--amber-glow), inset 0 1px 0 rgba(255,255,255,0.4);
+    transform: translateY(8px);
+  }
+
+  .bead.lower {
+    background: linear-gradient(160deg, #50d4b0, #20a080, #0a7060);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 4px rgba(0,0,0,0.3);
+  }
+  .bead.lower.active {
+    background: linear-gradient(160deg, #70f4d0, #30c090, #10a070);
+    box-shadow: 0 2px 16px var(--teal-glow), 0 0 20px var(--teal-glow), inset 0 1px 0 rgba(255,255,255,0.35);
+    transform: translateY(-4px);
+  }
+
+  /* Place value labels */
+  .place-labels {
+    display: flex;
+    max-width: 660px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 0 20px;
+  }
+  .place-label {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+  }
+  .place-label.active-col { color: var(--amber); }
+
+  /* Digit display */
+  .digit-display {
+    display: flex;
+    max-width: 660px;
+    width: 100%;
+    gap: 4px;
+    padding: 0 20px;
+  }
+  .digit-box {
+    flex: 1;
+    text-align: center;
+    font-size: 22px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--text2);
+    transition: color 0.2s;
+    min-width: 0;
+  }
+  .digit-box.nonzero { color: var(--amber); }
+
+  /* Total */
+  .total-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 28px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+  }
+  .total-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .total-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--amber);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ctrl-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
+  .ctrl-btn.primary { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); }
+
+  /* Number input */
+  .set-number {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .num-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    width: 120px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .num-input:focus { border-color: var(--amber); }
+
+  /* ── LEARN tab ── */
+  .learn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .learn-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .learn-card:hover { border-color: var(--amber); transform: translateY(-2px); }
+  .learn-card .card-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+  .learn-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .learn-card p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  /* ── REFERENCE tab ── */
+  .ref-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .ref-table table { width: 100%; border-collapse: collapse; }
+  .ref-table th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+  .ref-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: var(--surface2); }
+
+  .bead-vis {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .bv-upper { width: 18px; height: 10px; border-radius: 5px; }
+  .bv-upper.on  { background: var(--amber); box-shadow: 0 0 6px var(--amber-glow); }
+  .bv-upper.off { background: var(--surface2); border: 1px solid var(--border); }
+  .bv-lower { width: 14px; height: 10px; border-radius: 5px; }
+  .bv-lower.on  { background: var(--teal); box-shadow: 0 0 6px var(--teal-glow); }
+  .bv-lower.off { background: var(--surface2); border: 1px solid var(--border); }
+  .bv-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
+
+  .digit-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--amber);
+    min-width: 24px;
+  }
+
+  /* ── PRACTICE tab ── */
+  .practice-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+  .problem-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 48px;
+    text-align: center;
+    min-width: 280px;
+  }
+  .problem-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+  .problem-equation {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -2px;
+    margin-bottom: 4px;
+  }
+  .problem-equation .op { color: var(--text2); }
+  .answer-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 16px;
+    justify-content: center;
+  }
+  .answer-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    width: 100px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .answer-input:focus { border-color: var(--amber); }
+  .check-btn {
+    padding: 12px 22px;
+    background: var(--amber-glow);
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .check-btn:hover { background: var(--amber); color: var(--bg); }
+  .feedback {
+    font-size: 14px;
+    min-height: 22px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .feedback.correct { color: var(--teal); }
+  .feedback.wrong   { color: var(--accent); }
+
+  .score-row {
+    display: flex;
+    gap: 24px;
+  }
+  .score-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 24px;
+    text-align: center;
+  }
+  .score-box .s-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--amber);
+  }
+  .score-box .s-lab {
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .tabs { flex-wrap: wrap; }
+    .tab-btn { font-size: 9px; padding: 8px 4px; }
+    .abacus-frame { padding: 10px 8px 14px; }
+    .bead { max-width: 38px; height: 18px; }
+    .digit-box { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>The <span>Abacus</span></h1>
+    <p>Interactive Learning Guide · Soroban Method</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('abacus')">Abacus</button>
+    <button class="tab-btn" onclick="switchTab('how')">How To Use</button>
+    <button class="tab-btn" onclick="switchTab('reference')">Reference</button>
+    <button class="tab-btn" onclick="switchTab('practice')">Practice</button>
+  </div>
+
+  <!-- ── ABACUS TAB ── -->
+  <div id="tab-abacus" class="tab-panel active">
+    <div class="abacus-section">
+      <div class="abacus-info">
+        <div class="info-pill">Upper bead <span>= 5</span></div>
+        <div class="info-pill">Lower bead <span>= 1</span></div>
+        <div class="info-pill">Click beads to toggle</div>
+      </div>
+
+      <div class="abacus-frame">
+        <div class="frame-bar"></div>
+        <div class="abacus-body" id="abacus-body">
+          <div class="reckoning-bar"></div>
+          <!-- columns injected by JS -->
+        </div>
+        <div class="frame-bar"></div>
+      </div>
+
+      <div class="place-labels" id="place-labels"></div>
+      <div class="digit-display" id="digit-display"></div>
+
+      <div class="total-display">
+        <div class="total-label">Current value</div>
+        <div class="total-number" id="total-number">0</div>
+      </div>
+
+      <div class="controls">
+        <div class="set-number">
+          <input class="num-input" type="number" id="set-input" placeholder="0–9999999" min="0" max="9999999">
+          <button class="ctrl-btn primary" onclick="setNumber()">Set</button>
+        </div>
+        <button class="ctrl-btn" onclick="clearAbacus()">Clear</button>
+        <button class="ctrl-btn" onclick="randomNumber()">Random</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOW TO USE TAB ── -->
+  <div id="tab-how" class="tab-panel">
+    <div class="learn-grid">
+      <div class="learn-card">
+        <div class="card-icon">🔢</div>
+        <h3>Setting a Number</h3>
+        <p>Move beads <strong>toward</strong> the reckoning bar to activate them. Push an upper (amber) bead <em>down</em> to add 5. Push a lower (teal) bead <em>up</em> to add 1. Each column is a place value.</p>
+      </div>
+      <div class="learn-card">
+        <div class="card-icon">👁</div>
+        <h3>Reading the Abacus</h3>
+        <p>Scan each column left to right. Count active upper beads (×5) and active lower beads (×1). Add them for the column's digit. The columns represent: millions, hundred-thousands, ten-thousands, thousands, hundreds, tens, ones.</p>
+      </div>
+      <div class="learn-card">
+        <div class="card-icon">➕</div>
+        <h3>Adding</h3>
+        <p>Work left to right. For each digit, push the corresponding beads toward the bar. If the column is full, use complementary numbers — add the complement and carry to the next column.</p>
+      </div>
+      <div class="learn-card">
+        <div class="card-icon">➖</div>
+        <h3>Subtracting</h3>
+        <p>Push beads <em>away</em> from the bar. If you don't have enough beads, borrow from the next column and add the complement of what you need. This is the reverse of carrying in addition.</p>
+      </div>
+      <div class="learn-card">
+        <div class="card-icon">🔄</div>
+        <h3>Complementary Numbers</h3>
+        <p>Pairs summing to 5: (1,4), (2,3), (3,2), (4,1). Pairs summing to 10: (1,9), (2,8), (3,7), (4,6), (5,5). Mastering these unlocks fast calculation without counting bead by bead.</p>
+      </div>
+      <div class="learn-card">
+        <div class="card-icon">🧠</div>
+        <h3>Mental Abacus</h3>
+        <p>After physical mastery, close your eyes and visualize the beads. With practice (6–18 months), you can calculate by mentally moving beads — faster than a calculator. This is called <em>anzan</em>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REFERENCE TAB ── -->
+  <div id="tab-reference" class="tab-panel">
+    <div class="ref-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Digit</th>
+            <th>Bead pattern</th>
+            <th>Upper (×5)</th>
+            <th>Lower (×1)</th>
+          </tr>
+        </thead>
+        <tbody id="ref-tbody"></tbody>
+      </table>
+    </div>
+    <div class="ref-table">
+      <table>
+        <thead>
+          <tr>
+            <th colspan="2">Complements of 5</th>
+            <th colspan="2">Complements of 10</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--amber)">1</td><td style="color:var(--text2)">+ 4 = 5</td>
+            <td style="color:var(--amber)">1</td><td style="color:var(--text2)">+ 9 = 10</td>
+          </tr>
+          <tr>
+            <td style="color:var(--amber)">2</td><td style="color:var(--text2)">+ 3 = 5</td>
+            <td style="color:var(--amber)">2</td><td style="color:var(--text2)">+ 8 = 10</td>
+          </tr>
+          <tr>
+            <td style="color:var(--amber)">3</td><td style="color:var(--text2)">+ 2 = 5</td>
+            <td style="color:var(--amber)">3</td><td style="color:var(--text2)">+ 7 = 10</td>
+          </tr>
+          <tr>
+            <td style="color:var(--amber)">4</td><td style="color:var(--text2)">+ 1 = 5</td>
+            <td style="color:var(--amber)">4</td><td style="color:var(--text2)">+ 6 = 10</td>
+          </tr>
+          <tr>
+            <td></td><td></td>
+            <td style="color:var(--amber)">5</td><td style="color:var(--text2)">+ 5 = 10</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── PRACTICE TAB ── -->
+  <div id="tab-practice" class="tab-panel">
+    <div class="practice-area">
+      <div class="score-row">
+        <div class="score-box"><div class="s-num" id="sc-correct">0</div><div class="s-lab">Correct</div></div>
+        <div class="score-box"><div class="s-num" id="sc-total">0</div><div class="s-lab">Total</div></div>
+        <div class="score-box"><div class="s-num" id="sc-pct">—</div><div class="s-lab">Accuracy</div></div>
+      </div>
+
+      <div class="problem-card">
+        <div class="problem-label">Solve on your abacus, then enter answer</div>
+        <div class="problem-equation" id="prob-eq">Press "New Problem"</div>
+        <div class="answer-area">
+          <input class="answer-input" id="answer-input" type="number" placeholder="?">
+          <button class="check-btn" onclick="checkAnswer()">Check</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn primary" onclick="newProblem()">New Problem</button>
+        <button class="ctrl-btn" onclick="resetScore()">Reset Score</button>
+        <select id="difficulty" class="ctrl-btn" style="cursor:pointer">
+          <option value="easy">Easy (1-digit)</option>
+          <option value="med" selected>Medium (2-digit)</option>
+          <option value="hard">Hard (3-digit)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──
+const COLS = 7;
+const PLACES = ['M','HTh','TTh','Th','H','T','O'];
+// state[col] = { upper: 0|1, lower: 0-4 }
+let state = Array.from({length: COLS}, () => ({ upper: 0, lower: 0 }));
+
+// ── Build abacus ──
+function buildAbacus() {
+  const body = document.getElementById('abacus-body');
+  // keep reckoning bar
+  const bar = body.querySelector('.reckoning-bar');
+  body.innerHTML = '';
+  body.appendChild(bar);
+
+  for (let c = 0; c < COLS; c++) {
+    const col = document.createElement('div');
+    col.className = 'column';
+    col.dataset.col = c;
+
+    // Upper zone
+    const upper = document.createElement('div');
+    upper.className = 'upper-zone';
+    const ub = document.createElement('div');
+    ub.className = 'bead upper' + (state[c].upper ? ' active' : '');
+    ub.dataset.col = c;
+    ub.onclick = (e) => { e.stopPropagation(); toggleUpper(c); };
+    upper.appendChild(ub);
+    col.appendChild(upper);
+
+    // Lower zone
+    const lower = document.createElement('div');
+    lower.className = 'lower-zone';
+    for (let b = 0; b < 4; b++) {
+      const lb = document.createElement('div');
+      lb.className = 'bead lower' + (b < state[c].lower ? ' active' : '');
+      lb.dataset.col = c;
+      lb.dataset.bead = b;
+      lb.onclick = (e) => { e.stopPropagation(); toggleLower(c, b); };
+      lower.appendChild(lb);
+    }
+    col.appendChild(lower);
+    body.appendChild(col);
+  }
+  updateDisplay();
+}
+
+function toggleUpper(c) {
+  state[c].upper = state[c].upper ? 0 : 1;
+  buildAbacus();
+}
+
+function toggleLower(c, b) {
+  // If bead b is active (b < lower count), deactivate it and all above
+  // If inactive, activate it and all below
+  if (b < state[c].lower) {
+    state[c].lower = b; // deactivate from b upward
+  } else {
+    state[c].lower = b + 1; // activate beads 0..b
+  }
+  buildAbacus();
+}
+
+function updateDisplay() {
+  const labels = document.getElementById('place-labels');
+  const digits = document.getElementById('digit-display');
+  const total = document.getElementById('total-number');
+
+  labels.innerHTML = '';
+  digits.innerHTML = '';
+
+  let value = 0;
+  const placeValues = [1000000, 100000, 10000, 1000, 100, 10, 1];
+
+  for (let c = 0; c < COLS; c++) {
+    const digit = state[c].upper * 5 + state[c].lower;
+    value += digit * placeValues[c];
+
+    const lbl = document.createElement('div');
+    lbl.className = 'place-label' + (digit ? ' active-col' : '');
+    lbl.textContent = PLACES[c];
+    labels.appendChild(lbl);
+
+    const d = document.createElement('div');
+    d.className = 'digit-box' + (digit ? ' nonzero' : '');
+    d.textContent = digit;
+    digits.appendChild(d);
+  }
+
+  total.textContent = value.toLocaleString();
+}
+
+function clearAbacus() {
+  state = Array.from({length: COLS}, () => ({ upper: 0, lower: 0 }));
+  buildAbacus();
+}
+
+function setNumber() {
+  let n = parseInt(document.getElementById('set-input').value);
+  if (isNaN(n) || n < 0) n = 0;
+  if (n > 9999999) n = 9999999;
+  setFromNumber(n);
+}
+
+function setFromNumber(n) {
+  const placeValues = [1000000, 100000, 10000, 1000, 100, 10, 1];
+  let rem = n;
+  for (let c = 0; c < COLS; c++) {
+    const digit = Math.floor(rem / placeValues[c]);
+    rem %= placeValues[c];
+    state[c].upper = digit >= 5 ? 1 : 0;
+    state[c].lower = digit >= 5 ? digit - 5 : digit;
+  }
+  buildAbacus();
+}
+
+function randomNumber() {
+  const n = Math.floor(Math.random() * 9999) + 1;
+  document.getElementById('set-input').value = n;
+  setFromNumber(n);
+}
+
+// ── Reference table ──
+function buildReference() {
+  const tbody = document.getElementById('ref-tbody');
+  for (let d = 0; d <= 9; d++) {
+    const upper = d >= 5 ? 1 : 0;
+    const lower = d >= 5 ? d - 5 : d;
+    const tr = document.createElement('tr');
+
+    let beadHtml = '<div class="bead-vis">';
+    beadHtml += `<div class="bv-upper ${upper ? 'on' : 'off'}"></div>`;
+    beadHtml += '<div class="bv-sep"></div>';
+    for (let b = 0; b < 4; b++) {
+      beadHtml += `<div class="bv-lower ${b < lower ? 'on' : 'off'}"></div>`;
+    }
+    beadHtml += '</div>';
+
+    tr.innerHTML = `
+      <td><span class="digit-big">${d}</span></td>
+      <td>${beadHtml}</td>
+      <td style="color:var(--amber)">${upper}</td>
+      <td style="color:var(--teal)">${lower}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// ── Practice ──
+let currentAnswer = null;
+let scCorrect = 0, scTotal = 0;
+
+function newProblem() {
+  const diff = document.getElementById('difficulty').value;
+  let a, b, op;
+  const ops = ['+', '-'];
+  op = ops[Math.floor(Math.random() * 2)];
+
+  if (diff === 'easy') {
+    a = Math.floor(Math.random() * 9) + 1;
+    b = Math.floor(Math.random() * 9) + 1;
+  } else if (diff === 'med') {
+    a = Math.floor(Math.random() * 90) + 10;
+    b = Math.floor(Math.random() * 90) + 10;
+  } else {
+    a = Math.floor(Math.random() * 900) + 100;
+    b = Math.floor(Math.random() * 900) + 100;
+  }
+
+  if (op === '-' && b > a) [a, b] = [b, a];
+  currentAnswer = op === '+' ? a + b : a - b;
+
+  document.getElementById('prob-eq').innerHTML =
+    `${a} <span class="op">${op}</span> ${b} <span class="op">=</span> ?`;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('answer-input').focus();
+}
+
+function checkAnswer() {
+  if (currentAnswer === null) { newProblem(); return; }
+  const userAns = parseInt(document.getElementById('answer-input').value);
+  if (isNaN(userAns)) { document.getElementById('feedback').textContent = 'Enter a number first'; return; }
+
+  scTotal++;
+  const fb = document.getElementById('feedback');
+  if (userAns === currentAnswer) {
+    scCorrect++;
+    fb.textContent = '✓ Correct!';
+    fb.className = 'feedback correct';
+    setTimeout(newProblem, 1000);
+  } else {
+    fb.textContent = `✗ Not quite. The answer is ${currentAnswer}.`;
+    fb.className = 'feedback wrong';
+  }
+
+  document.getElementById('sc-correct').textContent = scCorrect;
+  document.getElementById('sc-total').textContent = scTotal;
+  document.getElementById('sc-pct').textContent =
+    scTotal ? Math.round(scCorrect / scTotal * 100) + '%' : '—';
+}
+
+function resetScore() {
+  scCorrect = 0; scTotal = 0;
+  document.getElementById('sc-correct').textContent = 0;
+  document.getElementById('sc-total').textContent = 0;
+  document.getElementById('sc-pct').textContent = '—';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('prob-eq').textContent = 'Press "New Problem"';
+  currentAnswer = null;
+}
+
+document.getElementById('answer-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkAnswer();
+});
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── Init ──
+buildAbacus();
+buildReference();
+</script>
+</body>
+</html>
