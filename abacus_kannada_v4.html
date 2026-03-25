@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ಅಬ್ಯಾಕಸ್ ಕಲಿಕೆ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Kannada:wght@400;700;900&family=Noto+Sans+Kannada:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1208;
+    --surface: #221a0a;
+    --surface2: #2d2210;
+    --border: #3d3018;
+    --text: #f0e8d0;
+    --text2: #9a8e70;
+    --amber: #f0b040;
+    --amber-light: #ffd060;
+    --amber-glow: rgba(240,176,64,0.22);
+    --teal: #38c8a0;
+    --teal-light: #60e8c0;
+    --teal-glow: rgba(56,200,160,0.18);
+    --accent: #e06040;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(ellipse at top, #2a1e08 0%, #0e0a04 70%);
+    color: var(--text);
+    font-family: 'Noto Sans Kannada', sans-serif;
+    min-height: 100vh;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 30px 16px 80px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; }
+  .header h1 {
+    font-family: 'Noto Serif Kannada', serif;
+    font-size: clamp(30px, 5vw, 54px);
+    font-weight: 900; color: var(--amber);
+    text-shadow: 0 0 40px var(--amber-glow);
+  }
+  .header p { margin-top: 8px; font-size: 12px; color: var(--text2); letter-spacing: 3px; }
+  .gold-line { width: 80px; height: 2px; background: linear-gradient(90deg,transparent,var(--amber),transparent); margin: 14px auto 0; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:3px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:5px; margin-bottom:36px; flex-wrap:wrap; }
+  .tab-btn { flex:1; min-width:80px; padding:10px 6px; border:none; background:transparent; color:var(--text2); font-family:'Noto Sans Kannada',sans-serif; font-size:12px; cursor:pointer; border-radius:8px; transition:all 0.2s; }
+  .tab-btn.active { background:var(--surface2); color:var(--amber); border:1px solid var(--border); }
+  .tab-btn:hover:not(.active) { color:var(--text); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ══ ABACUS SECTION ══ */
+  .abacus-section { display:flex; flex-direction:column; align-items:center; gap:24px; }
+
+  .legend-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .legend-item { display:flex; align-items:center; gap:9px; background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:7px 16px; font-size:13px; color:var(--text2); }
+  .legend-bead { width:26px; height:15px; border-radius:8px; }
+  .legend-bead.amber { background:linear-gradient(160deg,var(--amber-light),var(--amber)); box-shadow:0 0 10px var(--amber-glow); }
+  .legend-bead.teal  { background:linear-gradient(160deg,var(--teal-light),var(--teal));   box-shadow:0 0 10px var(--teal-glow); }
+
+  /* Outer wooden frame */
+  .abacus-wrapper { width:100%; max-width:820px; }
+  .abacus-outer {
+    background: linear-gradient(160deg, #6a4e28, #3a2810, #2a1c08);
+    border-radius:20px; padding:18px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.85), 0 0 0 2px #8a6a38,
+      inset 0 2px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.4);
+  }
+  .abacus-inner {
+    background: linear-gradient(170deg,#2e2010,#1e1408);
+    border-radius:12px; border:1px solid #4a3418;
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.55);
+    overflow:hidden;
+  }
+  .rail {
+    height:14px;
+    background:linear-gradient(180deg,#8a6a3a,#5a4220,#3a2c10);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+
+  /*
+   * THE FIX — pure absolute positioning
+   *
+   * We give the abacus-body a known total height.
+   * Everything inside is absolutely positioned:
+   *
+   *   UPPER BEADS:  top=0,           height = UPPER_H
+   *   BAR:          top = UPPER_H,   height = BAR_H        ← exactly between both zones
+   *   LOWER BEADS:  top = UPPER_H+BAR_H, height = LOWER_H
+   *
+   * UPPER_H = 120px   (plenty of room for 1 bead + travel)
+   * BAR_H   = 18px
+   * LOWER_H = 168px   (plenty of room for 4 beads + gaps)
+   * TOTAL   = 306px
+   *
+   * The column flex layout is ONLY used to space columns
+   * horizontally — all vertical placement is absolute.
+   */
+
+  .abacus-body {
+    position: relative;
+    height: 306px;   /* 120 + 18 + 168 */
+    padding: 10px 8px;
+  }
+
+  /* Reckoning bar — sits at exactly y=120 within the body */
+  .reckoning-bar {
+    position: absolute;
+    left: 0; right: 0;
+    top: 120px;          /* = UPPER_H */
+    height: 18px;        /* = BAR_H   */
+    background: linear-gradient(180deg,#a07840,#6a5028,#4a3818);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.45);
+    z-index: 20;
+    pointer-events: none;
+    border-radius: 2px;
+  }
+
+  /* Columns — horizontal flex only */
+  .columns {
+    position: absolute;
+    top: 10px; bottom: 10px; left: 8px; right: 8px;
+    display: flex;
+  }
+
+  .col {
+    flex: 1;
+    position: relative;   /* children use absolute inside here */
+  }
+
+  /* Rod */
+  .col::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 5px;
+    background: linear-gradient(90deg,#1a1408,#3a2e18,#1a1408);
+    border-radius: 3px;
+    z-index: 1;
+    box-shadow: 0 0 6px rgba(0,0,0,0.6);
+  }
+
+  /* Beads are absolutely positioned within the column */
+  .bead {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    width: 84%;
+    max-width: 72px;
+    height: 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    z-index: 5;
+    transition: top 0.18s cubic-bezier(0.34,1.4,0.64,1),
+                box-shadow 0.18s ease,
+                filter 0.18s ease;
+  }
+  .bead:hover { filter: brightness(1.25); }
+
+  /*
+   * UPPER BEAD
+   * Resting:  top = 60px  (sits in upper half, away from bar)
+   * Active:   top = 84px  (touching the bar from above: 120 - 28 - 8 = 84)
+   */
+  .bead.upper {
+    top: 52px;
+    background: linear-gradient(160deg,#ffd060 0%,#d08820 55%,#a06010 100%);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -3px 6px rgba(0,0,0,0.35);
+  }
+  .bead.upper.active {
+    top: 84px;   /* bar starts at 120, bead height 28, 8px gap → 120-28-8=84 */
+    background: linear-gradient(160deg,#ffe880 0%,#f0a030 55%,#c07020 100%);
+    box-shadow: 0 0 24px var(--amber-glow), 0 0 40px var(--amber-glow), inset 0 1px 0 rgba(255,255,255,0.45);
+  }
+
+  /*
+   * LOWER BEADS (4 per column)
+   * Bar bottom = 120 + 18 = 138px
+   * Resting positions (stacked, each 36px apart, from top of lower zone):
+   *   b=0: top = 160   b=1: top = 196   b=2: top = 232   b=3: top = 268
+   * Active (each slides UP toward bar, 8px from bar bottom):
+   *   b=0: top = 142   b=1: top = 178   b=2: top = 214   b=3: top = 250
+   *   (active beads stack tightly, 4px apart)
+   */
+  .bead.lower {
+    background: linear-gradient(160deg,#60e8c0 0%,#28a880 55%,#0a7858 100%);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -3px 6px rgba(0,0,0,0.35);
+  }
+  .bead.lower.active {
+    background: linear-gradient(160deg,#80ffdc 0%,#38d098 55%,#18a070 100%);
+    box-shadow: 0 0 22px var(--teal-glow), 0 0 36px var(--teal-glow), inset 0 1px 0 rgba(255,255,255,0.38);
+  }
+
+  /* Info row */
+  .info-bar { display:flex; max-width:820px; width:100%; padding:0 26px; }
+  .col-info  { flex:1; text-align:center; padding:0 2px; }
+  .place-lbl { font-size:9px; color:var(--text2); display:block; margin-bottom:4px; }
+  .place-lbl.on { color:var(--amber); }
+  .digit-val { font-family:'Noto Serif Kannada',serif; font-size:22px; font-weight:900; color:var(--text2); display:block; transition:color 0.2s; }
+  .digit-val.on { color:var(--amber); text-shadow:0 0 16px var(--amber-glow); }
+
+  /* Total */
+  .total-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 36px; text-align:center; }
+  .total-lbl { font-size:11px; color:var(--text2); margin-bottom:6px; letter-spacing:2px; }
+  .total-val { font-family:'Noto Serif Kannada',serif; font-size:48px; font-weight:900; color:var(--amber); letter-spacing:-2px; line-height:1; text-shadow:0 0 28px var(--amber-glow); }
+
+  /* Controls */
+  .ctrl-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .btn { padding:10px 20px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-family:'Noto Sans Kannada',sans-serif; font-size:13px; cursor:pointer; transition:all 0.15s; }
+  .btn:hover { border-color:var(--amber); color:var(--amber); background:var(--amber-glow); }
+  .btn.primary { background:var(--amber-glow); border-color:var(--amber); color:var(--amber); }
+  .num-input { background:var(--surface); border:1px solid var(--border); color:var(--text); font-family:'Noto Sans Kannada',sans-serif; font-size:15px; padding:9px 16px; border-radius:10px; width:130px; text-align:center; outline:none; transition:border-color 0.15s; }
+  .num-input:focus { border-color:var(--amber); }
+
+  /* Learn */
+  .learn-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; }
+  .learn-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; transition:border-color 0.2s,transform 0.2s; }
+  .learn-card:hover { border-color:var(--amber); transform:translateY(-3px); }
+  .card-icon { font-size:28px; margin-bottom:12px; }
+  .learn-card h3 { font-family:'Noto Serif Kannada',serif; font-size:17px; font-weight:700; margin-bottom:10px; color:var(--amber); }
+  .learn-card p  { font-size:13px; color:var(--text2); line-height:1.9; }
+
+  /* Reference */
+  .ref-table { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:20px; }
+  .ref-table table { width:100%; border-collapse:collapse; }
+  .ref-table th { background:var(--surface2); padding:12px 16px; text-align:left; font-size:11px; color:var(--text2); border-bottom:1px solid var(--border); }
+  .ref-table td { padding:12px 16px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .ref-table tr:last-child td { border-bottom:none; }
+  .ref-table tr:hover td { background:var(--surface2); }
+  .bead-vis { display:flex; gap:5px; align-items:center; }
+  .bv-u { width:20px; height:12px; border-radius:6px; }
+  .bv-u.on  { background:var(--amber); }
+  .bv-u.off { background:var(--surface2); border:1px solid var(--border); }
+  .bv-l { width:15px; height:12px; border-radius:6px; }
+  .bv-l.on  { background:var(--teal); }
+  .bv-l.off { background:var(--surface2); border:1px solid var(--border); }
+  .bv-sep { width:1px; height:16px; background:var(--border); margin:0 4px; }
+  .dnum { font-family:'Noto Serif Kannada',serif; font-size:22px; font-weight:900; color:var(--amber); min-width:26px; }
+
+  /* Practice */
+  .practice-area { display:flex; flex-direction:column; align-items:center; gap:24px; }
+  .score-row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+  .score-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 24px; text-align:center; }
+  .s-num { font-family:'Noto Serif Kannada',serif; font-size:30px; font-weight:900; color:var(--amber); }
+  .s-lab { font-size:11px; color:var(--text2); margin-top:2px; }
+  .prob-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:32px 40px; text-align:center; min-width:260px; }
+  .prob-lbl { font-size:12px; color:var(--text2); margin-bottom:12px; }
+  .prob-eq { font-family:'Noto Serif Kannada',serif; font-size:44px; font-weight:900; color:var(--text); letter-spacing:-2px; }
+  .prob-eq .op { color:var(--text2); }
+  .ans-row { display:flex; gap:10px; align-items:center; margin-top:16px; justify-content:center; }
+  .ans-input { background:var(--surface2); border:1px solid var(--border); color:var(--text); font-family:'Noto Serif Kannada',serif; font-size:30px; font-weight:700; padding:10px 16px; border-radius:12px; width:110px; text-align:center; outline:none; transition:border-color 0.15s; }
+  .ans-input:focus { border-color:var(--amber); }
+  .check-btn { padding:12px 22px; background:var(--amber-glow); border:1px solid var(--amber); color:var(--amber); font-family:'Noto Sans Kannada',sans-serif; font-size:13px; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+  .check-btn:hover { background:var(--amber); color:var(--bg); }
+  .feedback { font-size:14px; min-height:22px; margin-top:10px; font-weight:500; }
+  .feedback.correct { color:var(--teal); }
+  .feedback.wrong   { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>ಅಬ್ಯಾಕಸ್ ಕಲಿಕೆ</h1>
+    <p>ಸಂವಾದಾತ್ಮಕ ಮಾರ್ಗದರ್ಶಿ · ಸೊರೊಬಾನ್ ವಿಧಾನ</p>
+    <div class="gold-line"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('abacus',this)">🧮 ಅಬ್ಯಾಕಸ್</button>
+    <button class="tab-btn" onclick="switchTab('how',this)">📖 ಹೇಗೆ</button>
+    <button class="tab-btn" onclick="switchTab('ref',this)">📊 ಉಲ್ಲೇಖ</button>
+    <button class="tab-btn" onclick="switchTab('practice',this)">✏️ ಅಭ್ಯಾಸ</button>
+  </div>
+
+  <!-- ABACUS -->
+  <div id="tab-abacus" class="tab-panel active">
+    <div class="abacus-section">
+
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-bead amber"></div>ಮೇಲಿನ ಮಣಿ = <strong style="color:var(--amber)">೫</strong></div>
+        <div class="legend-item"><div class="legend-bead teal"></div>ಕೆಳಗಿನ ಮಣಿ = <strong style="color:var(--teal)">೧</strong></div>
+        <div class="legend-item">👆 ಮಣಿಗಳನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ</div>
+      </div>
+
+      <div class="abacus-wrapper">
+        <div class="abacus-outer">
+          <div class="abacus-inner">
+            <div class="rail"></div>
+            <div class="abacus-body">
+              <div class="reckoning-bar"></div>
+              <div class="columns" id="columns"></div>
+            </div>
+            <div class="rail"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-bar" id="info-bar"></div>
+
+      <div class="total-card">
+        <div class="total-lbl">ಪ್ರಸ್ತುತ ಮೌಲ್ಯ</div>
+        <div class="total-val" id="total-val">0</div>
+      </div>
+
+      <div class="ctrl-row">
+        <input class="num-input" type="number" id="set-input" placeholder="0–9999999" min="0" max="9999999">
+        <button class="btn primary" onclick="setNumber()">ಹೊಂದಿಸು</button>
+        <button class="btn" onclick="clearAbacus()">ಅಳಿಸು</button>
+        <button class="btn" onclick="randomNum()">ಯಾದೃಚ್ಛಿಕ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW -->
+  <div id="tab-how" class="tab-panel">
+    <div class="learn-grid">
+      <div class="learn-card"><div class="card-icon">🔢</div><h3>ಸಂಖ್ಯೆ ಹೊಂದಿಸುವುದು</h3><p>ಮಣಿಗಳನ್ನು ಅಡ್ಡಗಡಿಯ ಕಡೆ ತಳ್ಳಿ ಸಕ್ರಿಯಗೊಳಿಸಿ. ಮೇಲಿನ ಮಣಿ ಕೆಳಕ್ಕೆ = ೫. ಕೆಳಗಿನ ಮಣಿ ಮೇಲಕ್ಕೆ = ೧.</p></div>
+      <div class="learn-card"><div class="card-icon">👁</div><h3>ಅಬ್ಯಾಕಸ್ ಓದುವುದು</h3><p>ಎಡದಿಂದ ಬಲಕ್ಕೆ ಪ್ರತಿ ಕಾಲಮ್ ನೋಡಿ. ಮೇಲಿನ ×೫ + ಕೆಳಗಿನ ×೧ = ಆ ಅಂಕಿ. ಲಕ್ಷ → ಸಾವಿರ → ನೂರು → ಹತ್ತು → ಒಂದು.</p></div>
+      <div class="learn-card"><div class="card-icon">➕</div><h3>ಕೂಡಿಸುವುದು</h3><p>ಎಡದಿಂದ ಬಲಕ್ಕೆ ಕೆಲಸ ಮಾಡಿ. ಕಾಲಮ್ ತುಂಬಿದ್ದರೆ ಪೂರಕ ಸಂಖ್ಯೆ ಬಳಸಿ ಮುಂದಿನ ಕಾಲಮ್‌ಗೆ ಸಾಗಿಸಿ.</p></div>
+      <div class="learn-card"><div class="card-icon">➖</div><h3>ಕಳೆಯುವುದು</h3><p>ಮಣಿಗಳನ್ನು ಗಡಿಯಿಂದ ದೂರ ತಳ್ಳಿ. ಸಾಲದಿದ್ದರೆ ಮುಂದಿನ ಕಾಲಮ್‌ನಿಂದ ಎರವಲು ತೆಗೆದು ಪೂರಕ ಸಂಖ್ಯೆ ಸೇರಿಸಿ.</p></div>
+      <div class="learn-card"><div class="card-icon">🔄</div><h3>ಪೂರಕ ಸಂಖ್ಯೆಗಳು</h3><p>೫ ಕ್ಕೆ: (೧,೪)(೨,೩)(೩,೨)(೪,೧)<br>೧೦ ಕ್ಕೆ: (೧,೯)(೨,೮)(೩,೭)(೪,೬)(೫,೫)<br>ಇವನ್ನು ಕಂಠಪಾಠ ಮಾಡಿ — ವೇಗ ಹೆಚ್ಚಾಗುತ್ತದೆ.</p></div>
+      <div class="learn-card"><div class="card-icon">🧠</div><h3>ಮಾನಸಿಕ ಅಬ್ಯಾಕಸ್</h3><p>ಕಣ್ಣು ಮುಚ್ಚಿ ಮಣಿಗಳನ್ನು ಮನಸ್ಸಿನಲ್ಲಿ ಕಲ್ಪಿಸಿ. ಇದನ್ನು <em>ಅಂಝಾನ್</em> ಎಂದು ಕರೆಯುತ್ತಾರೆ. ೬–೧೮ ತಿಂಗಳ ಅಭ್ಯಾಸದ ನಂತರ ಕ್ಯಾಲ್ಕುಲೇಟರ್‌ಗಿಂತ ವೇಗವಾಗಿ ಲೆಕ್ಕ ಮಾಡಬಹುದು!</p></div>
+    </div>
+  </div>
+
+  <!-- REFERENCE -->
+  <div id="tab-ref" class="tab-panel">
+    <div class="ref-table">
+      <table>
+        <thead><tr><th>ಅಂಕಿ</th><th>ಮಣಿ ಮಾದರಿ</th><th>ಮೇಲಿನ (×೫)</th><th>ಕೆಳಗಿನ (×೧)</th></tr></thead>
+        <tbody id="ref-tbody"></tbody>
+      </table>
+    </div>
+    <div class="ref-table">
+      <table>
+        <thead><tr><th colspan="2">೫ ರ ಪೂರಕ ಸಂಖ್ಯೆಗಳು</th><th colspan="2">೧೦ ರ ಪೂರಕ ಸಂಖ್ಯೆಗಳು</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--amber)">೧ + ೪ = ೫</td><td></td><td style="color:var(--amber)">೧ + ೯ = ೧೦</td><td></td></tr>
+          <tr><td style="color:var(--amber)">೨ + ೩ = ೫</td><td></td><td style="color:var(--amber)">೨ + ೮ = ೧೦</td><td></td></tr>
+          <tr><td style="color:var(--amber)">೩ + ೨ = ೫</td><td></td><td style="color:var(--amber)">೩ + ೭ = ೧೦</td><td></td></tr>
+          <tr><td style="color:var(--amber)">೪ + ೧ = ೫</td><td></td><td style="color:var(--amber)">೪ + ೬ = ೧೦</td><td></td></tr>
+          <tr><td></td><td></td><td style="color:var(--amber)">೫ + ೫ = ೧೦</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div id="tab-practice" class="tab-panel">
+    <div class="practice-area">
+      <div class="score-row">
+        <div class="score-box"><div class="s-num" id="sc-c">0</div><div class="s-lab">ಸರಿಯಾದ</div></div>
+        <div class="score-box"><div class="s-num" id="sc-t">0</div><div class="s-lab">ಒಟ್ಟು</div></div>
+        <div class="score-box"><div class="s-num" id="sc-p">—</div><div class="s-lab">ನಿಖರತೆ</div></div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-lbl">ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ಲೆಕ್ಕ ಮಾಡಿ ಉತ್ತರ ಬರೆಯಿರಿ</div>
+        <div class="prob-eq" id="prob-eq">"ಹೊಸ ಪ್ರಶ್ನೆ" ಒತ್ತಿರಿ</div>
+        <div class="ans-row">
+          <input class="ans-input" id="ans-input" type="number" placeholder="?">
+          <button class="check-btn" onclick="checkAns()">ಪರೀಕ್ಷಿಸು</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="ctrl-row">
+        <button class="btn primary" onclick="newProblem()">ಹೊಸ ಪ್ರಶ್ನೆ</button>
+        <button class="btn" onclick="resetScore()">ಮರುಹೊಂದಿಸು</button>
+        <select id="diff" class="btn" style="cursor:pointer;background:var(--surface)">
+          <option value="easy">ಸುಲಭ (೧ ಅಂಕಿ)</option>
+          <option value="med" selected>ಮಧ್ಯಮ (೨ ಅಂಕಿ)</option>
+          <option value="hard">ಕಷ್ಟ (೩ ಅಂಕಿ)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+/*
+ * Layout constants — must match CSS exactly
+ *
+ *  abacus-body height = 306px  (with 10px padding top/bottom = 286px inner)
+ *  reckoning bar: top=120, height=18  → bottom=138
+ *
+ *  Upper bead (height 28px):
+ *    RESTING top  = 52  (well above bar)
+ *    ACTIVE  top  = 84  (bar_top - bead_h - gap = 120-28-8 = 84)
+ *
+ *  Lower beads (height 28px each), 4 beads:
+ *    Resting: stacked from top of lower zone, 8px gap between each
+ *      bar_bottom = 138
+ *      b=0 resting: 154   active: 142  (bar_bottom + gap_from_bar = 138+4=142)
+ *      b=1 resting: 192   active: 174  (142 + 28 + 4)
+ *      b=2 resting: 230   active: 206  (174 + 28 + 4)
+ *      b=3 resting: 268   active: 238  (206 + 28 + 4)
+ */
+const UPPER_REST   = 52;
+const UPPER_ACTIVE = 84;
+const LOWER_REST   = [154, 192, 230, 268];
+const LOWER_ACTIVE = [142, 174, 206, 238];
+
+const COLS = 7;
+const PLACES = ['ಲಕ್ಷ','ಲ.ಸಾ','ಹ.ಸಾ','ಸಾ','ನೂ','ಹ','ಒ'];
+let state = Array.from({length:COLS}, () => ({upper:0, lower:0}));
+
+function buildAbacus() {
+  const wrap = document.getElementById('columns');
+  wrap.innerHTML = '';
+
+  for (let c = 0; c < COLS; c++) {
+    const col = document.createElement('div');
+    col.className = 'col';
+
+    // Upper bead
+    const ub = document.createElement('div');
+    ub.className = 'bead upper';
+    ub.style.top = (state[c].upper ? UPPER_ACTIVE : UPPER_REST) + 'px';
+    if (state[c].upper) ub.classList.add('active');
+    ub.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state[c].upper ^= 1;
+      buildAbacus();
+    });
+    col.appendChild(ub);
+
+    // Lower beads (4)
+    for (let b = 0; b < 4; b++) {
+      const lb = document.createElement('div');
+      lb.className = 'bead lower';
+      const isActive = b < state[c].lower;
+      lb.style.top = (isActive ? LOWER_ACTIVE[b] : LOWER_REST[b]) + 'px';
+      if (isActive) lb.classList.add('active');
+      lb.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // tap bead b: if active → deactivate from b; if inactive → activate 0..b
+        state[c].lower = (b < state[c].lower) ? b : b + 1;
+        buildAbacus();
+      });
+      col.appendChild(lb);
+    }
+
+    wrap.appendChild(col);
+  }
+  updateInfo();
+}
+
+function updateInfo() {
+  const bar = document.getElementById('info-bar');
+  bar.innerHTML = '';
+  const pv = [1000000,100000,10000,1000,100,10,1];
+  let total = 0;
+  for (let c = 0; c < COLS; c++) {
+    const d = state[c].upper * 5 + state[c].lower;
+    total += d * pv[c];
+    const ci = document.createElement('div');
+    ci.className = 'col-info';
+    ci.innerHTML = `
+      <span class="place-lbl${d?' on':''}">${PLACES[c]}</span>
+      <span class="digit-val${d?' on':''}">${d}</span>`;
+    bar.appendChild(ci);
+  }
+  document.getElementById('total-val').textContent = total.toLocaleString('kn-IN');
+}
+
+function clearAbacus() {
+  state = Array.from({length:COLS}, ()=>({upper:0,lower:0}));
+  buildAbacus();
+}
+function setFromNum(n) {
+  const pv=[1000000,100000,10000,1000,100,10,1];
+  let rem = Math.max(0,Math.min(9999999,n));
+  for(let c=0;c<COLS;c++){
+    const d=Math.floor(rem/pv[c]); rem%=pv[c];
+    state[c].upper=d>=5?1:0; state[c].lower=d>=5?d-5:d;
+  }
+  buildAbacus();
+}
+function setNumber(){ const n=parseInt(document.getElementById('set-input').value); if(!isNaN(n)) setFromNum(n); }
+function randomNum(){ const n=~~(Math.random()*9999)+1; document.getElementById('set-input').value=n; setFromNum(n); }
+
+// Reference
+function buildRef(){
+  const tb=document.getElementById('ref-tbody');
+  for(let d=0;d<=9;d++){
+    const u=d>=5?1:0, l=d>=5?d-5:d;
+    let bv='<div class="bead-vis">';
+    bv+=`<div class="bv-u ${u?'on':'off'}"></div><div class="bv-sep"></div>`;
+    for(let b=0;b<4;b++) bv+=`<div class="bv-l ${b<l?'on':'off'}"></div>`;
+    bv+='</div>';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="dnum">${d}</span></td><td>${bv}</td><td style="color:var(--amber)">${u}</td><td style="color:var(--teal)">${l}</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+// Practice
+let ans=null,correct=0,total=0;
+function newProblem(){
+  const d=document.getElementById('diff').value;
+  let a,b,op=Math.random()>.5?'+':'-';
+  if(d==='easy'){a=~~(Math.random()*9)+1;b=~~(Math.random()*9)+1;}
+  else if(d==='med'){a=~~(Math.random()*90)+10;b=~~(Math.random()*90)+10;}
+  else{a=~~(Math.random()*900)+100;b=~~(Math.random()*900)+100;}
+  if(op==='-'&&b>a)[a,b]=[b,a];
+  ans=op==='+'?a+b:a-b;
+  document.getElementById('prob-eq').innerHTML=`${a} <span class="op">${op}</span> ${b} <span class="op">=</span> ?`;
+  document.getElementById('ans-input').value='';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('ans-input').focus();
+}
+function checkAns(){
+  if(ans===null){newProblem();return;}
+  const u=parseInt(document.getElementById('ans-input').value);
+  if(isNaN(u)){document.getElementById('feedback').textContent='ಮೊದಲು ಸಂಖ್ಯೆ ನಮೂದಿಸಿ';return;}
+  total++;
+  const fb=document.getElementById('feedback');
+  if(u===ans){correct++;fb.textContent='✓ ಸರಿಯಾಗಿದೆ! ಬಹಳ ಚೆನ್ನಾಗಿ!';fb.className='feedback correct';setTimeout(newProblem,1400);}
+  else{fb.textContent=`✗ ತಪ್ಪಾಗಿದೆ. ಸರಿಯಾದ ಉತ್ತರ: ${ans}`;fb.className='feedback wrong';}
+  document.getElementById('sc-c').textContent=correct;
+  document.getElementById('sc-t').textContent=total;
+  document.getElementById('sc-p').textContent=total?Math.round(correct/total*100)+'%':'—';
+}
+function resetScore(){correct=0;total=0;ans=null;['sc-c','sc-t'].forEach(id=>document.getElementById(id).textContent=0);document.getElementById('sc-p').textContent='—';document.getElementById('feedback').textContent='';document.getElementById('prob-eq').textContent='"ಹೊಸ ಪ್ರಶ್ನೆ" ಒತ್ತಿರಿ';}
+document.getElementById('ans-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkAns();});
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+buildAbacus();
+buildRef();
+</script>
+</body>
+</html>
