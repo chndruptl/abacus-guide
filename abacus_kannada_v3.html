@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ಅಬ್ಯಾಕಸ್ ಕಲಿಕೆ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Kannada:wght@400;700;900&family=Noto+Sans+Kannada:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1208;
+    --surface: #221a0a;
+    --surface2: #2d2210;
+    --border: #3d3018;
+    --text: #f0e8d0;
+    --text2: #9a8e70;
+    --amber: #f0b040;
+    --amber-light: #ffd060;
+    --amber-glow: rgba(240,176,64,0.2);
+    --teal: #38c8a0;
+    --teal-light: #60e8c0;
+    --teal-glow: rgba(56,200,160,0.15);
+    --accent: #e06040;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(ellipse at top, #2a1e08 0%, #0e0a04 70%);
+    color: var(--text);
+    font-family: 'Noto Sans Kannada', sans-serif;
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 36px 20px 80px; }
+
+  .header { text-align: center; margin-bottom: 48px; }
+  .header h1 {
+    font-family: 'Noto Serif Kannada', serif;
+    font-size: clamp(34px, 5vw, 58px);
+    font-weight: 900; color: var(--amber);
+    text-shadow: 0 0 40px var(--amber-glow);
+  }
+  .header p { margin-top: 10px; font-size: 13px; color: var(--text2); letter-spacing: 3px; }
+  .gold-line { width: 80px; height: 2px; background: linear-gradient(90deg, transparent, var(--amber), transparent); margin: 16px auto 0; }
+
+  .tabs {
+    display: flex; gap: 3px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 5px; margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .tab-btn {
+    flex: 1; min-width: 90px; padding: 11px 8px;
+    border: none; background: transparent; color: var(--text2);
+    font-family: 'Noto Sans Kannada', sans-serif; font-size: 13px;
+    cursor: pointer; border-radius: 8px; transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--surface2); color: var(--amber); border: 1px solid var(--border); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ══ ABACUS ══ */
+  .abacus-section { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .legend-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 8px 18px; font-size: 13px; color: var(--text2);
+  }
+  .legend-bead { width: 28px; height: 16px; border-radius: 8px; }
+  .legend-bead.amber { background: linear-gradient(160deg, var(--amber-light), var(--amber)); box-shadow: 0 0 10px var(--amber-glow); }
+  .legend-bead.teal  { background: linear-gradient(160deg, var(--teal-light), var(--teal));   box-shadow: 0 0 10px var(--teal-glow); }
+
+  /* Frame */
+  .abacus-wrapper { width: 100%; max-width: 860px; }
+  .abacus-outer {
+    background: linear-gradient(160deg, #6a4e28, #3a2810, #2a1c08);
+    border-radius: 22px; padding: 20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 0 2px #8a6a38,
+      inset 0 2px 0 rgba(255,255,255,0.08), inset 0 -2px 0 rgba(0,0,0,0.4);
+  }
+  .abacus-inner {
+    background: linear-gradient(170deg, #2e2010, #1e1408);
+    border-radius: 14px; border: 1px solid #4a3418;
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  /* Top rail */
+  .rail {
+    height: 16px;
+    background: linear-gradient(180deg, #8a6a3a, #5a4220, #3a2c10);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+
+  /*
+   * KEY FIX: The abacus body is a CSS Grid:
+   *   Row 1 = upper bead zone (fixed height)
+   *   Row 2 = reckoning bar   (fixed height)
+   *   Row 3 = lower bead zone (fixed height)
+   * This guarantees the bar sits exactly between the two zones.
+   */
+  .abacus-body {
+    display: grid;
+    grid-template-rows: 110px 20px 160px;
+    position: relative;
+    padding: 12px 10px;
+  }
+
+  /* Reckoning bar — occupies row 2 of the grid */
+  .reckoning-bar {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    background: linear-gradient(180deg, #9a7a42, #6a5228, #4a3818);
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.4);
+    z-index: 10;
+    margin: 0 -10px; /* stretch edge to edge */
+  }
+
+  /* Columns overlay — sits on top of the grid rows using absolute */
+  .columns {
+    position: absolute;
+    top: 12px; bottom: 12px; left: 10px; right: 10px;
+    display: flex;
+  }
+
+  /* Each column */
+  .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Rod behind beads */
+  .col::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 5px;
+    background: linear-gradient(90deg, #1a1408, #3a2e18, #1a1408);
+    border-radius: 3px;
+    z-index: 1;
+    box-shadow: 0 0 6px rgba(0,0,0,0.6);
+  }
+
+  /* Upper bead zone — exactly 110px tall, bead sits at bottom */
+  .upper-zone {
+    height: 110px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;      /* bead rests at bottom of zone = just above bar */
+    justify-content: center;
+    padding-bottom: 6px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+
+  /* Lower bead zone — exactly 160px tall, beads stack from top */
+  .lower-zone {
+    height: 160px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 6px;
+    position: relative;
+    z-index: 2;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Spacer so upper+bar+lower heights add up inside .col */
+  .bar-spacer { height: 20px; flex-shrink: 0; }
+
+  /* Beads */
+  .bead {
+    width: 86%;
+    max-width: 76px;
+    height: 30px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, filter 0.2s;
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+  }
+  .bead:hover { filter: brightness(1.25); }
+
+  .bead.upper {
+    background: linear-gradient(160deg, #ffd060 0%, #d08820 55%, #a06010 100%);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -3px 6px rgba(0,0,0,0.35);
+  }
+  .bead.upper.active {
+    background: linear-gradient(160deg, #ffe880 0%, #f0a030 55%, #c07020 100%);
+    box-shadow: 0 2px 22px var(--amber-glow), 0 0 32px var(--amber-glow), inset 0 1px 0 rgba(255,255,255,0.45);
+    transform: translateY(16px);   /* slides DOWN toward bar */
+  }
+
+  .bead.lower {
+    background: linear-gradient(160deg, #60e8c0 0%, #28a880 55%, #0a7858 100%);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -3px 6px rgba(0,0,0,0.35);
+  }
+  .bead.lower.active {
+    background: linear-gradient(160deg, #80ffdc 0%, #38d098 55%, #18a070 100%);
+    box-shadow: 0 2px 22px var(--teal-glow), 0 0 32px var(--teal-glow), inset 0 1px 0 rgba(255,255,255,0.38);
+    transform: translateY(-10px);  /* slides UP toward bar */
+  }
+
+  /* Info bar */
+  .info-bar { display: flex; max-width: 860px; width: 100%; padding: 0 30px; }
+  .col-info  { flex: 1; text-align: center; padding: 0 2px; }
+  .place-lbl { font-size: 10px; color: var(--text2); display: block; margin-bottom: 4px; }
+  .place-lbl.active { color: var(--amber); }
+  .digit-val {
+    font-family: 'Noto Serif Kannada', serif;
+    font-size: 24px; font-weight: 900; color: var(--text2);
+    transition: color 0.2s; display: block;
+  }
+  .digit-val.nonzero { color: var(--amber); text-shadow: 0 0 16px var(--amber-glow); }
+
+  /* Total */
+  .total-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px 40px; text-align: center; }
+  .total-lbl { font-size: 11px; color: var(--text2); margin-bottom: 6px; letter-spacing: 2px; }
+  .total-val {
+    font-family: 'Noto Serif Kannada', serif;
+    font-size: 52px; font-weight: 900; color: var(--amber);
+    letter-spacing: -2px; line-height: 1; text-shadow: 0 0 30px var(--amber-glow);
+  }
+
+  /* Controls */
+  .ctrl-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    padding: 11px 22px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2);
+    font-family: 'Noto Sans Kannada', sans-serif; font-size: 13px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
+  .btn.primary { background: var(--amber-glow); border-color: var(--amber); color: var(--amber); }
+  .num-input {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'Noto Sans Kannada', sans-serif; font-size: 15px;
+    padding: 9px 16px; border-radius: 10px; width: 130px; text-align: center; outline: none;
+    transition: border-color 0.15s;
+  }
+  .num-input:focus { border-color: var(--amber); }
+
+  /* Learn */
+  .learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; }
+  .learn-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px; transition: border-color 0.2s, transform 0.2s; }
+  .learn-card:hover { border-color: var(--amber); transform: translateY(-3px); }
+  .card-icon { font-size: 30px; margin-bottom: 14px; }
+  .learn-card h3 { font-family: 'Noto Serif Kannada', serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; color: var(--amber); }
+  .learn-card p  { font-size: 13px; color: var(--text2); line-height: 1.9; }
+
+  /* Reference */
+  .ref-table { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+  .ref-table table { width: 100%; border-collapse: collapse; }
+  .ref-table th { background: var(--surface2); padding: 13px 18px; text-align: left; font-size: 11px; color: var(--text2); border-bottom: 1px solid var(--border); letter-spacing: 1px; }
+  .ref-table td { padding: 13px 18px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: var(--surface2); }
+  .bead-vis { display: flex; gap: 5px; align-items: center; }
+  .bv-u { width: 22px; height: 13px; border-radius: 7px; }
+  .bv-u.on  { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); }
+  .bv-u.off { background: var(--surface2); border: 1px solid var(--border); }
+  .bv-l { width: 16px; height: 13px; border-radius: 7px; }
+  .bv-l.on  { background: var(--teal); box-shadow: 0 0 8px var(--teal-glow); }
+  .bv-l.off { background: var(--surface2); border: 1px solid var(--border); }
+  .bv-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+  .dnum { font-family: 'Noto Serif Kannada', serif; font-size: 24px; font-weight: 900; color: var(--amber); min-width: 28px; }
+
+  /* Practice */
+  .practice-area { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+  .score-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .score-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 28px; text-align: center; }
+  .s-num { font-family: 'Noto Serif Kannada', serif; font-size: 32px; font-weight: 900; color: var(--amber); }
+  .s-lab { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 36px 48px; text-align: center; min-width: 280px; }
+  .prob-lbl { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
+  .prob-eq { font-family: 'Noto Serif Kannada', serif; font-size: 48px; font-weight: 900; color: var(--text); letter-spacing: -2px; margin-bottom: 4px; }
+  .prob-eq .op { color: var(--text2); }
+  .ans-row { display: flex; gap: 10px; align-items: center; margin-top: 18px; justify-content: center; }
+  .ans-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Noto Serif Kannada', serif; font-size: 32px; font-weight: 700; padding: 10px 20px; border-radius: 12px; width: 120px; text-align: center; outline: none; transition: border-color 0.15s; }
+  .ans-input:focus { border-color: var(--amber); }
+  .check-btn { padding: 13px 24px; background: var(--amber-glow); border: 1px solid var(--amber); color: var(--amber); font-family: 'Noto Sans Kannada', sans-serif; font-size: 14px; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+  .check-btn:hover { background: var(--amber); color: var(--bg); }
+  .feedback { font-size: 15px; min-height: 24px; margin-top: 10px; font-weight: 500; }
+  .feedback.correct { color: var(--teal); }
+  .feedback.wrong   { color: var(--accent); }
+
+  @media (max-width: 560px) {
+    .abacus-body { grid-template-rows: 80px 16px 130px; }
+    .upper-zone  { height: 80px; }
+    .lower-zone  { height: 130px; gap: 5px; }
+    .bar-spacer  { height: 16px; }
+    .bead { height: 22px; border-radius: 11px; max-width: 52px; }
+    .bead.upper.active { transform: translateY(12px); }
+    .bead.lower.active { transform: translateY(-8px); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>ಅಬ್ಯಾಕಸ್ ಕಲಿಕೆ</h1>
+    <p>ಸಂವಾದಾತ್ಮಕ ಮಾರ್ಗದರ್ಶಿ · ಸೊರೊಬಾನ್ ವಿಧಾನ</p>
+    <div class="gold-line"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('abacus',this)">🧮 ಅಬ್ಯಾಕಸ್</button>
+    <button class="tab-btn" onclick="switchTab('how',this)">📖 ಹೇಗೆ ಬಳಸುವುದು</button>
+    <button class="tab-btn" onclick="switchTab('ref',this)">📊 ಉಲ್ಲೇಖ</button>
+    <button class="tab-btn" onclick="switchTab('practice',this)">✏️ ಅಭ್ಯಾಸ</button>
+  </div>
+
+  <!-- ABACUS TAB -->
+  <div id="tab-abacus" class="tab-panel active">
+    <div class="abacus-section">
+
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-bead amber"></div> ಮೇಲಿನ ಮಣಿ = <strong style="color:var(--amber)">೫</strong></div>
+        <div class="legend-item"><div class="legend-bead teal"></div> ಕೆಳಗಿನ ಮಣಿ = <strong style="color:var(--teal)">೧</strong></div>
+        <div class="legend-item" style="font-size:12px">👆 ಮಣಿಗಳನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ</div>
+      </div>
+
+      <div class="abacus-wrapper">
+        <div class="abacus-outer">
+          <div class="abacus-inner">
+            <div class="rail"></div>
+
+            <!--
+              Grid layout:
+                Row 1 (110px) — upper bead area
+                Row 2 ( 20px) — reckoning bar
+                Row 3 (160px) — lower bead area
+
+              The .columns div overlays this grid absolutely
+              so each column has upper-zone / bar-spacer / lower-zone
+              that perfectly match the 3 grid rows.
+            -->
+            <div class="abacus-body">
+              <!-- Reckoning bar occupies grid row 2 -->
+              <div class="reckoning-bar"></div>
+
+              <!-- Columns sit on top via absolute positioning -->
+              <div class="columns" id="columns">
+                <!-- JS fills this -->
+              </div>
+            </div>
+
+            <div class="rail"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-bar" id="info-bar"></div>
+
+      <div class="total-card">
+        <div class="total-lbl">ಪ್ರಸ್ತುತ ಮೌಲ್ಯ</div>
+        <div class="total-val" id="total-val">0</div>
+      </div>
+
+      <div class="ctrl-row">
+        <input class="num-input" type="number" id="set-input" placeholder="0 – 9999999" min="0" max="9999999">
+        <button class="btn primary" onclick="setNumber()">ಹೊಂದಿಸು</button>
+        <button class="btn" onclick="clearAbacus()">ಅಳಿಸು</button>
+        <button class="btn" onclick="randomNum()">ಯಾದೃಚ್ಛಿಕ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TAB -->
+  <div id="tab-how" class="tab-panel">
+    <div class="learn-grid">
+      <div class="learn-card"><div class="card-icon">🔢</div><h3>ಸಂಖ್ಯೆ ಹೊಂದಿಸುವುದು</h3><p>ಮಣಿಗಳನ್ನು <strong style="color:var(--text)">ಅಡ್ಡಗಡಿಯ ಕಡೆ</strong> ತಳ್ಳಿ ಸಕ್ರಿಯಗೊಳಿಸಿ. ಮೇಲಿನ ಮಣಿ (ಹಳದಿ) ಕೆಳಕ್ಕೆ ತಳ್ಳಿದರೆ ೫ ಸೇರುತ್ತದೆ. ಕೆಳಗಿನ ಮಣಿ (ಹಸಿರು) ಮೇಲಕ್ಕೆ ತಳ್ಳಿದರೆ ೧ ಸೇರುತ್ತದೆ.</p></div>
+      <div class="learn-card"><div class="card-icon">👁</div><h3>ಅಬ್ಯಾಕಸ್ ಓದುವುದು</h3><p>ಎಡದಿಂದ ಬಲಕ್ಕೆ ಪ್ರತಿ ಕಾಲಮ್ ನೋಡಿ. ಸಕ್ರಿಯ ಮೇಲಿನ ಮಣಿ ×೫ ಮತ್ತು ಕೆಳಗಿನ ಮಣಿ ×೧ ಕೂಡಿಸಿ. ಕಾಲಮ್‌ಗಳು: ಲಕ್ಷ → ಸಾವಿರ → ನೂರು → ಹತ್ತು → ಒಂದು.</p></div>
+      <div class="learn-card"><div class="card-icon">➕</div><h3>ಕೂಡಿಸುವುದು</h3><p>ಎಡದಿಂದ ಬಲಕ್ಕೆ ಕೆಲಸ ಮಾಡಿ. ಪ್ರತಿ ಅಂಕಿಗೆ ತಕ್ಕ ಮಣಿಗಳನ್ನು ಗಡಿಯ ಕಡೆ ತಳ್ಳಿ. ಕಾಲಮ್ ತುಂಬಿದ್ದರೆ, ಪೂರಕ ಸಂಖ್ಯೆ ಬಳಸಿ ಮುಂದಿನ ಕಾಲಮ್‌ಗೆ ಸಾಗಿಸಿ.</p></div>
+      <div class="learn-card"><div class="card-icon">➖</div><h3>ಕಳೆಯುವುದು</h3><p>ಮಣಿಗಳನ್ನು ಗಡಿಯಿಂದ ದೂರ ತಳ್ಳಿ. ಸಾಕಷ್ಟು ಮಣಿ ಇಲ್ಲದಿದ್ದರೆ, ಮುಂದಿನ ಕಾಲಮ್‌ನಿಂದ ಎರವಲು ಪಡೆದು ಪೂರಕ ಸಂಖ್ಯೆ ಸೇರಿಸಿ.</p></div>
+      <div class="learn-card"><div class="card-icon">🔄</div><h3>ಪೂರಕ ಸಂಖ್ಯೆಗಳು</h3><p>೫ ಕ್ಕೆ ಜೊತೆ: (೧,೪) (೨,೩) (೩,೨) (೪,೧)<br>೧೦ ಕ್ಕೆ ಜೊತೆ: (೧,೯) (೨,೮) (೩,೭) (೪,೬) (೫,೫)<br>ಇವನ್ನು ಕಂಠಪಾಠ ಮಾಡಿಕೊಂಡರೆ ಲೆಕ್ಕ ಬಹಳ ವೇಗವಾಗುತ್ತದೆ.</p></div>
+      <div class="learn-card"><div class="card-icon">🧠</div><h3>ಮಾನಸಿಕ ಅಬ್ಯಾಕಸ್</h3><p>ದೈಹಿಕ ಅಭ್ಯಾಸದ ನಂತರ, ಕಣ್ಣು ಮುಚ್ಚಿ ಮಣಿಗಳನ್ನು ಮನಸ್ಸಿನಲ್ಲಿ ಕಲ್ಪಿಸಿ. ಇದನ್ನು <em>ಅಂಝಾನ್</em> ಎಂದು ಕರೆಯುತ್ತಾರೆ. ೬–೧೮ ತಿಂಗಳಲ್ಲಿ ಕ್ಯಾಲ್ಕುಲೇಟರ್‌ಗಿಂತ ವೇಗವಾಗಿ ಲೆಕ್ಕ ಮಾಡಬಹುದು!</p></div>
+    </div>
+  </div>
+
+  <!-- REFERENCE TAB -->
+  <div id="tab-ref" class="tab-panel">
+    <div class="ref-table">
+      <table>
+        <thead><tr><th>ಅಂಕಿ</th><th>ಮಣಿ ಮಾದರಿ</th><th>ಮೇಲಿನ (×೫)</th><th>ಕೆಳಗಿನ (×೧)</th></tr></thead>
+        <tbody id="ref-tbody"></tbody>
+      </table>
+    </div>
+    <div class="ref-table">
+      <table>
+        <thead><tr><th colspan="2">೫ ರ ಪೂರಕ ಸಂಖ್ಯೆಗಳು</th><th colspan="2">೧೦ ರ ಪೂರಕ ಸಂಖ್ಯೆಗಳು</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--amber)">೧ + ೪ = ೫</td><td></td><td style="color:var(--amber)">೧ + ೯ = ೧೦</td><td></td></tr>
+          <tr><td style="color:var(--amber)">೨ + ೩ = ೫</td><td></td><td style="color:var(--amber)">೨ + ೮ = ೧೦</td><td></td></tr>
+          <tr><td style="color:var(--amber)">೩ + ೨ = ೫</td><td></td><td style="color:var(--amber)">೩ + ೭ = ೧೦</td><td></td></tr>
+          <tr><td style="color:var(--amber)">೪ + ೧ = ೫</td><td></td><td style="color:var(--amber)">೪ + ೬ = ೧೦</td><td></td></tr>
+          <tr><td></td><td></td><td style="color:var(--amber)">೫ + ೫ = ೧೦</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRACTICE TAB -->
+  <div id="tab-practice" class="tab-panel">
+    <div class="practice-area">
+      <div class="score-row">
+        <div class="score-box"><div class="s-num" id="sc-c">0</div><div class="s-lab">ಸರಿಯಾದ</div></div>
+        <div class="score-box"><div class="s-num" id="sc-t">0</div><div class="s-lab">ಒಟ್ಟು</div></div>
+        <div class="score-box"><div class="s-num" id="sc-p">—</div><div class="s-lab">ನಿಖರತೆ</div></div>
+      </div>
+      <div class="prob-card">
+        <div class="prob-lbl">ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ಲೆಕ್ಕ ಮಾಡಿ, ಉತ್ತರ ಬರೆಯಿರಿ</div>
+        <div class="prob-eq" id="prob-eq">"ಹೊಸ ಪ್ರಶ್ನೆ" ಒತ್ತಿರಿ</div>
+        <div class="ans-row">
+          <input class="ans-input" id="ans-input" type="number" placeholder="?">
+          <button class="check-btn" onclick="checkAns()">ಪರೀಕ್ಷಿಸು</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="ctrl-row">
+        <button class="btn primary" onclick="newProblem()">ಹೊಸ ಪ್ರಶ್ನೆ</button>
+        <button class="btn" onclick="resetScore()">ಮರುಹೊಂದಿಸು</button>
+        <select id="diff" class="btn" style="cursor:pointer;background:var(--surface)">
+          <option value="easy">ಸುಲಭ (೧ ಅಂಕಿ)</option>
+          <option value="med" selected>ಮಧ್ಯಮ (೨ ಅಂಕಿ)</option>
+          <option value="hard">ಕಷ್ಟ (೩ ಅಂಕಿ)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Heights must match CSS grid-template-rows
+const UPPER_H = 110;
+const BAR_H   = 20;
+const LOWER_H  = 160;
+
+const COLS = 7;
+const PLACES = ['ಲಕ್ಷ','ಲ.ಸಾ','ಹ.ಸಾ','ಸಾ','ನೂ','ಹ','ಒ'];
+let state = Array.from({length:COLS}, () => ({upper:0, lower:0}));
+
+function buildAbacus() {
+  const wrap = document.getElementById('columns');
+  wrap.innerHTML = '';
+
+  for (let c = 0; c < COLS; c++) {
+    const col = document.createElement('div');
+    col.className = 'col';
+
+    // ── Upper zone (height = UPPER_H) ──
+    const uz = document.createElement('div');
+    uz.className = 'upper-zone';
+    uz.style.height = UPPER_H + 'px';
+
+    const ub = document.createElement('div');
+    ub.className = 'bead upper' + (state[c].upper ? ' active' : '');
+    ub.onclick = e => { e.stopPropagation(); state[c].upper ^= 1; buildAbacus(); };
+    uz.appendChild(ub);
+    col.appendChild(uz);
+
+    // ── Bar spacer (height = BAR_H) — keeps layout in sync with the grid row ──
+    const sp = document.createElement('div');
+    sp.className = 'bar-spacer';
+    sp.style.height = BAR_H + 'px';
+    col.appendChild(sp);
+
+    // ── Lower zone (height = LOWER_H) ──
+    const lz = document.createElement('div');
+    lz.className = 'lower-zone';
+    lz.style.height = LOWER_H + 'px';
+
+    for (let b = 0; b < 4; b++) {
+      const lb = document.createElement('div');
+      lb.className = 'bead lower' + (b < state[c].lower ? ' active' : '');
+      lb.onclick = e => {
+        e.stopPropagation();
+        state[c].lower = (b < state[c].lower) ? b : b + 1;
+        buildAbacus();
+      };
+      lz.appendChild(lb);
+    }
+    col.appendChild(lz);
+    wrap.appendChild(col);
+  }
+  updateInfo();
+}
+
+function updateInfo() {
+  const bar = document.getElementById('info-bar');
+  bar.innerHTML = '';
+  const pv = [1000000,100000,10000,1000,100,10,1];
+  let total = 0;
+  for (let c = 0; c < COLS; c++) {
+    const d = state[c].upper * 5 + state[c].lower;
+    total += d * pv[c];
+    const ci = document.createElement('div');
+    ci.className = 'col-info';
+    ci.innerHTML = `<span class="place-lbl${d?' active':''}">${PLACES[c]}</span><span class="digit-val${d?' nonzero':''}">${d}</span>`;
+    bar.appendChild(ci);
+  }
+  document.getElementById('total-val').textContent = total.toLocaleString('kn-IN');
+}
+
+function clearAbacus() {
+  state = Array.from({length:COLS}, () => ({upper:0,lower:0}));
+  buildAbacus();
+}
+
+function setFromNum(n) {
+  const pv = [1000000,100000,10000,1000,100,10,1];
+  let rem = Math.max(0, Math.min(9999999, n));
+  for (let c = 0; c < COLS; c++) {
+    const d = Math.floor(rem / pv[c]); rem %= pv[c];
+    state[c].upper = d >= 5 ? 1 : 0;
+    state[c].lower = d >= 5 ? d - 5 : d;
+  }
+  buildAbacus();
+}
+
+function setNumber() { const n = parseInt(document.getElementById('set-input').value); if (!isNaN(n)) setFromNum(n); }
+function randomNum()  { const n = ~~(Math.random()*9999)+1; document.getElementById('set-input').value=n; setFromNum(n); }
+
+// Reference table
+function buildRef() {
+  const tb = document.getElementById('ref-tbody');
+  for (let d = 0; d <= 9; d++) {
+    const u = d>=5?1:0, l = d>=5?d-5:d;
+    let bv = '<div class="bead-vis">';
+    bv += `<div class="bv-u ${u?'on':'off'}"></div><div class="bv-sep"></div>`;
+    for (let b=0;b<4;b++) bv += `<div class="bv-l ${b<l?'on':'off'}"></div>`;
+    bv += '</div>';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span class="dnum">${d}</span></td><td>${bv}</td><td style="color:var(--amber)">${u}</td><td style="color:var(--teal)">${l}</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+// Practice
+let ans=null, correct=0, total=0;
+function newProblem() {
+  const d=document.getElementById('diff').value;
+  let a,b,op=Math.random()>.5?'+':'-';
+  if(d==='easy'){a=~~(Math.random()*9)+1;b=~~(Math.random()*9)+1;}
+  else if(d==='med'){a=~~(Math.random()*90)+10;b=~~(Math.random()*90)+10;}
+  else{a=~~(Math.random()*900)+100;b=~~(Math.random()*900)+100;}
+  if(op==='-'&&b>a)[a,b]=[b,a];
+  ans=op==='+'?a+b:a-b;
+  document.getElementById('prob-eq').innerHTML=`${a} <span class="op">${op}</span> ${b} <span class="op">=</span> ?`;
+  document.getElementById('ans-input').value='';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('ans-input').focus();
+}
+function checkAns() {
+  if(ans===null){newProblem();return;}
+  const u=parseInt(document.getElementById('ans-input').value);
+  if(isNaN(u)){document.getElementById('feedback').textContent='ಮೊದಲು ಸಂಖ್ಯೆ ನಮೂದಿಸಿ';return;}
+  total++;
+  const fb=document.getElementById('feedback');
+  if(u===ans){correct++;fb.textContent='✓ ಸರಿಯಾಗಿದೆ! ಬಹಳ ಚೆನ್ನಾಗಿ ಮಾಡಿದ್ದೀರಿ!';fb.className='feedback correct';setTimeout(newProblem,1400);}
+  else{fb.textContent=`✗ ತಪ್ಪಾಗಿದೆ. ಸರಿಯಾದ ಉತ್ತರ: ${ans}`;fb.className='feedback wrong';}
+  document.getElementById('sc-c').textContent=correct;
+  document.getElementById('sc-t').textContent=total;
+  document.getElementById('sc-p').textContent=total?Math.round(correct/total*100)+'%':'—';
+}
+function resetScore(){correct=0;total=0;ans=null;['sc-c','sc-t'].forEach(id=>document.getElementById(id).textContent=0);document.getElementById('sc-p').textContent='—';document.getElementById('feedback').textContent='';document.getElementById('prob-eq').textContent='"ಹೊಸ ಪ್ರಶ್ನೆ" ಒತ್ತಿರಿ';}
+document.getElementById('ans-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkAns();});
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+buildAbacus();
+buildRef();
+</script>
+</body>
+</html>
