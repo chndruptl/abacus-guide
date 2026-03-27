@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abacus Runners Level II / ಅಬ್ಯಾಕಸ್ ರನ್ನರ್ಸ್ ಲೆವೆಲ್ II</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Kannada:wght@400;700;900&family=Noto+Sans+Kannada:wght@400;600;700;800&family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink:   #FF6B9D;
+    --yellow: #FFD93D;
+    --teal:   #06D6A0;
+    --blue:   #4CC9F0;
+    --orange: #FF9F43;
+    --purple: #A855F7;
+    --red:    #FF4757;
+    --green:  #2ECC71;
+    --indigo: #4361EE;
+    --bg:     #F8F0FF;
+    --text:   #2D2D2D;
+    --text2:  #666;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'Noto Sans Kannada', 'Nunito', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '🌟✨⭐🌟✨⭐🌟✨⭐🌟✨⭐🌟✨⭐🌟✨⭐';
+    position: fixed; top: 0; left: 0; right: 0;
+    font-size: 18px; letter-spacing: 16px; opacity: 0.05;
+    pointer-events: none; word-break: break-all; line-height: 2.6; z-index: 0;
+  }
+  .page { max-width: 960px; margin: 0 auto; padding: 24px 16px 80px; position: relative; z-index: 1; }
+
+  /* ── LANG TOGGLE ── */
+  .lang-bar {
+    display: flex; justify-content: center; gap: 10px;
+    margin-bottom: 24px;
+  }
+  .lang-btn {
+    padding: 10px 28px; border-radius: 50px; border: 2.5px solid var(--purple);
+    background: white; color: var(--purple);
+    font-family: 'Noto Sans Kannada', sans-serif; font-size: 15px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .lang-btn.active { background: var(--purple); color: white; box-shadow: 0 6px 20px rgba(168,85,247,0.35); }
+  .lang-btn:hover:not(.active) { background: #F3E8FF; }
+
+  .en, .kn { display: none; }
+  .show-en .en { display: block; }
+  .show-kn .kn { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    background: linear-gradient(135deg, #A855F7, #4361EE, #06D6A0);
+    border-radius: 32px; padding: 36px 24px; margin-bottom: 32px;
+    box-shadow: 0 14px 50px rgba(168,85,247,0.4);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 2px, transparent 2px, transparent 14px);
+  }
+  .hero-emoji { font-size: 64px; display: block; animation: bounce 1.8s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .hero h1 {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: clamp(26px, 5vw, 50px);
+    color: white; text-shadow: 3px 3px 0 rgba(0,0,0,0.15); line-height: 1.15; margin-top: 8px;
+  }
+  .hero p { font-size: clamp(13px, 2.5vw, 17px); color: rgba(255,255,255,0.92); margin-top: 10px; font-weight: 700; }
+  .level-badge {
+    display: inline-block; background: white; color: var(--purple);
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 16px; font-weight: 900;
+    padding: 7px 22px; border-radius: 20px;
+    margin-top: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+
+  /* ── SECTION TITLE ── */
+  .sec-title {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: clamp(18px, 3.5vw, 28px); font-weight: 900;
+    text-align: center; margin: 36px 0 18px;
+  }
+  .sec-title .pill {
+    background: var(--c, #FFD93D); color: white;
+    padding: 9px 24px; border-radius: 50px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.12);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+    display: inline-block;
+  }
+
+  /* ── INTRO CARD ── */
+  .intro-card {
+    background: white; border-radius: 24px; padding: 26px 22px;
+    margin-bottom: 26px; border: 3px solid var(--bc, #FFD93D);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.07); text-align: center;
+  }
+  .intro-card .big-emoji { font-size: 52px; margin-bottom: 10px; }
+  .intro-card h2 {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: clamp(18px, 3.5vw, 26px); font-weight: 900;
+    color: var(--tc, #FF9F43); margin-bottom: 12px;
+  }
+  .intro-card p { font-size: clamp(13px, 2.2vw, 15px); line-height: 2; color: var(--text); font-weight: 600; }
+  .hl { background: var(--yellow); border-radius: 7px; padding: 1px 9px; font-weight: 800; color: #333; display: inline-block; }
+
+  /* ── TWIN GRID ── */
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media(max-width:520px){ .twin { grid-template-columns: 1fr; } }
+
+  /* ── TABLE CARD ── */
+  .tcard {
+    background: white; border-radius: 22px; padding: 18px 14px;
+    border: 3px solid var(--bc, #4CC9F0);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.07);
+  }
+  .tcard h3 {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 17px; font-weight: 900;
+    color: var(--bc, #4CC9F0); text-align: center; margin-bottom: 14px;
+  }
+  .trow {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 10px; border-radius: 11px; margin-bottom: 5px;
+    font-size: 14px; font-weight: 700; transition: transform 0.15s;
+  }
+  .trow:hover { transform: scale(1.03); }
+  .trow:nth-child(odd)  { background: #F5F0FF; }
+  .trow:nth-child(even) { background: #FFF5F0; }
+  .trow .n1 { color: var(--red);   font-size: 15px; font-weight: 900; }
+  .trow .n2 { color: var(--green); font-size: 15px; font-weight: 900; }
+  .trow .arr { color: var(--text2); font-size: 12px; }
+
+  /* ── FORMULA INTRO BANNER ── */
+  .fi-banner {
+    border-radius: 20px; padding: 20px 22px; margin-bottom: 18px;
+    color: white; font-size: 14px; font-weight: 700; line-height: 1.9; text-align: center;
+  }
+  .fi-banner .fit {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 20px; font-weight: 900; display: block; margin-bottom: 8px;
+  }
+
+  /* ── FORMULA GRID ── */
+  .fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px,1fr)); gap: 12px; margin-bottom: 22px; }
+  .fc {
+    background: white; border-radius: 18px; padding: 14px 10px;
+    border: 2.5px solid var(--fc, #06D6A0);
+    box-shadow: 0 5px 16px rgba(0,0,0,0.07);
+    text-align: center; transition: transform 0.18s, box-shadow 0.18s; cursor: default;
+  }
+  .fc:hover { transform: translateY(-4px); box-shadow: 0 10px 26px rgba(0,0,0,0.12); }
+  .fc .fe { font-size: 22px; margin-bottom: 4px; display: block; }
+  .fc .fm {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 14px; font-weight: 900; color: var(--fc, #06D6A0); margin-bottom: 6px;
+  }
+  .fc .fp { font-size: 11px; color: var(--text2); font-weight: 700; line-height: 1.6; }
+
+  /* ── COMBO GRID (2-col formula) ── */
+  .combo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+  @media(max-width:500px){ .combo-grid { grid-template-columns: 1fr; } }
+  .combo-card {
+    background: white; border-radius: 18px; padding: 14px 12px;
+    border: 2.5px solid var(--cc, #4361EE);
+    box-shadow: 0 5px 16px rgba(0,0,0,0.07);
+    text-align: center; transition: transform 0.18s;
+  }
+  .combo-card:hover { transform: translateY(-3px); }
+  .combo-card .ce { font-size: 20px; margin-bottom: 4px; display: block; }
+  .combo-card .cm {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 13px; font-weight: 900; color: var(--cc, #4361EE); margin-bottom: 5px;
+  }
+  .combo-card .cp { font-size: 11px; color: var(--text2); font-weight: 700; line-height: 1.6; }
+
+  /* ── STORY CARDS ── */
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 16px; margin-bottom: 30px; }
+  .scard {
+    border-radius: 22px; padding: 20px 16px;
+    border: 3px solid var(--sc, #FF6B9D);
+    background: var(--sbg, #FFF0F6);
+  }
+  .scard .se { font-size: 36px; margin-bottom: 10px; display: block; }
+  .scard h4 {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 16px; font-weight: 900; color: var(--sc, #FF6B9D); margin-bottom: 8px;
+  }
+  .scard p { font-size: 12px; line-height: 1.9; font-weight: 600; color: #444; }
+  .scard .ans {
+    margin-top: 10px; background: var(--sc, #FF6B9D); color: white;
+    border-radius: 12px; padding: 7px 14px;
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 14px; font-weight: 900; display: inline-block;
+  }
+
+  /* ── TIPS ── */
+  .tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; margin-bottom: 30px; }
+  .tipcard {
+    background: white; border-radius: 20px; padding: 18px 14px;
+    text-align: center; border: 2.5px solid var(--tc2, #FFD93D);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+  .tipcard .ti { font-size: 32px; margin-bottom: 8px; }
+  .tipcard h4 {
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 14px; font-weight: 900; color: var(--tc2, #FFD93D); margin-bottom: 6px;
+  }
+  .tipcard p { font-size: 11px; color: var(--text2); font-weight: 600; line-height: 1.7; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 4px; border-radius: 2px; margin: 36px 0;
+    background: linear-gradient(90deg, var(--purple), var(--blue), var(--teal));
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    background: linear-gradient(135deg, #A855F7, #4361EE);
+    border-radius: 24px; padding: 28px;
+    color: white;
+    font-family: 'Fredoka One', 'Noto Serif Kannada', serif;
+    font-size: 22px; font-weight: 900;
+    box-shadow: 0 10px 30px rgba(168,85,247,0.3);
+  }
+  .footer p { font-size: 13px; font-family: 'Noto Sans Kannada','Nunito',sans-serif; font-weight: 700; margin-top: 8px; opacity: 0.92; }
+</style>
+</head>
+<body>
+<div class="page show-en" id="main">
+
+  <!-- LANG TOGGLE -->
+  <div class="lang-bar">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+    <button class="lang-btn" id="btn-kn" onclick="setLang('kn')">🇮🇳 ಕನ್ನಡ</button>
+  </div>
+
+  <!-- ══════════ HERO ══════════ -->
+  <div class="hero">
+    <span class="hero-emoji">🏃</span>
+    <h1 class="en">Abacus Runners Level II!</h1>
+    <h1 class="kn">ಅಬ್ಯಾಕಸ್ ರನ್ನರ್ಸ್ ಲೆವೆಲ್ II!</h1>
+    <p class="en">Small Sister · Combo Friends · Combo Formula 🎉</p>
+    <p class="kn">ಸಣ್ಣ ತಂಗಿ · ಕಾಂಬೋ ಗೆಳೆಯರು · ಕಾಂಬೋ ಸೂತ್ರ 🎉</p>
+    <div class="level-badge en">👧 Ages 4–6 · Runners Level II</div>
+    <div class="level-badge kn">👧 ೪–೬ ವರ್ಷ · ರನ್ನರ್ಸ್ ಲೆವೆಲ್ II</div>
+  </div>
+
+  <!-- ══════════ SMALL SISTER INTRO ══════════ -->
+  <div class="sec-title"><span class="pill" style="--c:#FF6B9D">👧 Small Sister!</span></div>
+
+  <div class="intro-card" style="--bc:#FF6B9D; --tc:#FF6B9D">
+    <div class="big-emoji">👧</div>
+    <h2 class="en">Who is "Small Sister"? 🤔</h2>
+    <h2 class="kn">"ಸಣ್ಣ ತಂಗಿ" ಅಂದರೆ ಯಾರು? 🤔</h2>
+    <p class="en">
+      Remember Big Brother who gave us <span class="hl">10</span>?<br>
+      Now meet <strong>Small Sister</strong> — she gives us <span class="hl">5</span>! 🙌<br><br>
+      When your abacus column needs help with small numbers (1 to 4),<br>
+      Small Sister steps in and gives you <strong>5 beads</strong>,<br>
+      and you give back the extra ones! ✨<br><br>
+      <strong>Example:</strong> +4 means → Add 5 (Small Sister), Remove 1 ✅
+    </p>
+    <p class="kn">
+      ದೊಡ್ಡಣ್ಣ ನಮಗೆ <span class="hl">೧೦</span> ಕೊಡ್ತಿದ್ದ ನೆನಪಿದೆಯಾ?<br>
+      ಈಗ <strong>ಸಣ್ಣ ತಂಗಿ</strong> ಬಂದಿದ್ದಾಳೆ — ಅವಳು ನಮಗೆ <span class="hl">೫</span> ಕೊಡ್ತಾಳೆ! 🙌<br><br>
+      ಸಣ್ಣ ಸಂಖ್ಯೆಗಳಿಗೆ (೧ ರಿಂದ ೪) ಜಾಗ ಇಲ್ಲದಿದ್ದರೆ,<br>
+      ಸಣ್ಣ ತಂಗಿ <strong>೫ ಮಣಿ</strong> ಕೊಡ್ತಾಳೆ, ನಾವು ಹೆಚ್ಚಾದದ್ದು ವಾಪಸ್ ಕೊಡ್ತೀವಿ! ✨<br><br>
+      <strong>ಉದಾ:</strong> +೪ ಅಂದರೆ → ೫ ಸೇರಿಸು, ೧ ತೆಗೆ ✅
+    </p>
+  </div>
+
+  <!-- Small Sister friend table -->
+  <div class="twin">
+    <div class="tcard" style="--bc:#FF6B9D">
+      <h3 class="en">👧 5-Friends (Small Sister)</h3>
+      <h3 class="kn">👧 ೫ ರ ಗೆಳೆಯರು (ಸಣ್ಣ ತಂಗಿ)</h3>
+      <div class="trow"><span class="n1">4</span><span class="arr">🤝</span><span class="n2">1</span></div>
+      <div class="trow"><span class="n1">3</span><span class="arr">🤝</span><span class="n2">2</span></div>
+      <div class="trow"><span class="n1">2</span><span class="arr">🤝</span><span class="n2">3</span></div>
+      <div class="trow"><span class="n1">1</span><span class="arr">🤝</span><span class="n2">4</span></div>
+    </div>
+    <div class="tcard" style="--bc:#FF9F43">
+      <h3 class="en">👧 50-Friends (Small Sister)</h3>
+      <h3 class="kn">👧 ೫೦ ರ ಗೆಳೆಯರು (ಸಣ್ಣ ತಂಗಿ)</h3>
+      <div class="trow"><span class="n1">40</span><span class="arr">🤝</span><span class="n2">10</span></div>
+      <div class="trow"><span class="n1">30</span><span class="arr">🤝</span><span class="n2">20</span></div>
+      <div class="trow"><span class="n1">20</span><span class="arr">🤝</span><span class="n2">30</span></div>
+      <div class="trow"><span class="n1">10</span><span class="arr">🤝</span><span class="n2">40</span></div>
+    </div>
+  </div>
+
+  <!-- Small Sis formulas ADD 1-4 -->
+  <div class="sec-title"><span class="pill" style="--c:#06D6A0">➕ Small Sister Adding (1 to 4)</span></div>
+  <div class="fi-banner" style="background:linear-gradient(135deg,#06D6A0,#4CC9F0)">
+    <span class="fit en">🧠 Small Sister Adding Rule!</span>
+    <span class="fit kn">🧠 ಸಣ್ಣ ತಂಗಿ ಕೂಡಿಸುವ ನಿಯಮ!</span>
+    <span class="en">Can't add directly? Ask Small Sister!<br>👉 <strong>Add 5</strong>, then <strong>remove the friend number</strong><br>+4 = +5 − 1 &nbsp;·&nbsp; +3 = +5 − 2 &nbsp;·&nbsp; +2 = +5 − 3 &nbsp;·&nbsp; +1 = +5 − 4</span>
+    <span class="kn">ನೇರವಾಗಿ ಸೇರಿಸಲಾಗದಿದ್ದರೆ? ಸಣ್ಣ ತಂಗಿ ಕೇಳು!<br>👉 <strong>೫ ಸೇರಿಸು</strong>, ಆಮೇಲೆ <strong>ಗೆಳೆಯ ಸಂಖ್ಯೆ ತೆಗೆ</strong><br>+೪ = +೫ − ೧ &nbsp;·&nbsp; +೩ = +೫ − ೨ &nbsp;·&nbsp; +೨ = +೫ − ೩ &nbsp;·&nbsp; +೧ = +೫ − ೪</span>
+  </div>
+  <div class="fgrid">
+    <div class="fc" style="--fc:#06D6A0"><span class="fe">🍉</span><div class="fm en">+4 = +5 − 1</div><div class="fm kn">+೪ = +೫ − ೧</div><div class="fp en">Add 5 beads,<br>remove 1 bead</div><div class="fp kn">೫ ಮಣಿ ಸೇರಿಸು,<br>೧ ಮಣಿ ತೆಗೆ</div></div>
+    <div class="fc" style="--fc:#4CC9F0"><span class="fe">🫐</span><div class="fm en">+3 = +5 − 2</div><div class="fm kn">+೩ = +೫ − ೨</div><div class="fp en">Add 5 beads,<br>remove 2 beads</div><div class="fp kn">೫ ಮಣಿ ಸೇರಿಸು,<br>೨ ಮಣಿ ತೆಗೆ</div></div>
+    <div class="fc" style="--fc:#FF9F43"><span class="fe">🍊</span><div class="fm en">+2 = +5 − 3</div><div class="fm kn">+೨ = +೫ − ೩</div><div class="fp en">Add 5 beads,<br>remove 3 beads</div><div class="fp kn">೫ ಮಣಿ ಸೇರಿಸು,<br>೩ ಮಣಿ ತೆಗೆ</div></div>
+    <div class="fc" style="--fc:#FF6B9D"><span class="fe">🍓</span><div class="fm en">+1 = +5 − 4</div><div class="fm kn">+೧ = +೫ − ೪</div><div class="fp en">Add 5 beads,<br>remove 4 beads</div><div class="fp kn">೫ ಮಣಿ ಸೇರಿಸು,<br>೪ ಮಣಿ ತೆಗೆ</div></div>
+  </div>
+
+  <!-- Small Sis formulas REMOVE 1-4 -->
+  <div class="sec-title"><span class="pill" style="--c:#A855F7">➖ Small Sister Removing (1 to 4)</span></div>
+  <div class="fi-banner" style="background:linear-gradient(135deg,#A855F7,#EC4899)">
+    <span class="fit en">🧠 Small Sister Removing Rule!</span>
+    <span class="fit kn">🧠 ಸಣ್ಣ ತಂಗಿ ಕಳೆಯುವ ನಿಯಮ!</span>
+    <span class="en">Not enough beads to remove? Ask Small Sister!<br>👉 <strong>Remove 5</strong>, then <strong>add back the friend number</strong><br>−4 = +1 − 5 &nbsp;·&nbsp; −3 = +2 − 5 &nbsp;·&nbsp; −2 = +3 − 5 &nbsp;·&nbsp; −1 = +4 − 5</span>
+    <span class="kn">ತೆಗೆಯಲು ಮಣಿ ಇಲ್ಲವೇ? ಸಣ್ಣ ತಂಗಿ ಕೇಳು!<br>👉 <strong>೫ ತೆಗೆ</strong>, ಆಮೇಲೆ <strong>ಗೆಳೆಯ ಸಂಖ್ಯೆ ವಾಪಸ್ ಹಾಕು</strong><br>−೪ = +೧ − ೫ &nbsp;·&nbsp; −೩ = +೨ − ೫ &nbsp;·&nbsp; −೨ = +೩ − ೫ &nbsp;·&nbsp; −೧ = +೪ − ೫</span>
+  </div>
+  <div class="fgrid">
+    <div class="fc" style="--fc:#A855F7"><span class="fe">🍇</span><div class="fm en">−4 = +1 − 5</div><div class="fm kn">−೪ = +೧ − ೫</div><div class="fp en">Add back 1,<br>remove 5 beads</div><div class="fp kn">೧ ವಾಪಸ್ ಹಾಕು,<br>೫ ಮಣಿ ತೆಗೆ</div></div>
+    <div class="fc" style="--fc:#EC4899"><span class="fe">🌸</span><div class="fm en">−3 = +2 − 5</div><div class="fm kn">−೩ = +೨ − ೫</div><div class="fp en">Add back 2,<br>remove 5 beads</div><div class="fp kn">೨ ವಾಪಸ್ ಹಾಕು,<br>೫ ಮಣಿ ತೆಗೆ</div></div>
+    <div class="fc" style="--fc:#FF9F43"><span class="fe">🌻</span><div class="fm en">−2 = +3 − 5</div><div class="fm kn">−೨ = +೩ − ೫</div><div class="fp en">Add back 3,<br>remove 5 beads</div><div class="fp kn">೩ ವಾಪಸ್ ಹಾಕು,<br>೫ ಮಣಿ ತೆಗೆ</div></div>
+    <div class="fc" style="--fc:#06D6A0"><span class="fe">🌿</span><div class="fm en">−1 = +4 − 5</div><div class="fm kn">−೧ = +೪ − ೫</div><div class="fp en">Add back 4,<br>remove 5 beads</div><div class="fp kn">೪ ವಾಪಸ್ ಹಾಕು,<br>೫ ಮಣಿ ತೆಗೆ</div></div>
+  </div>
+
+  <!-- Small Sis 10-40 -->
+  <div class="sec-title"><span class="pill" style="--c:#4CC9F0">🔢 Small Sister for Tens (10 to 40)</span></div>
+  <div class="twin">
+    <div class="tcard" style="--bc:#4CC9F0">
+      <h3 class="en">➕ Adding (10 to 40)</h3>
+      <h3 class="kn">➕ ಕೂಡಿಸುವುದು (೧೦ ರಿಂದ ೪೦)</h3>
+      <div class="trow"><span class="n1 en">+40 = +50 − 10</span><span class="n1 kn">+೪೦ = +೫೦ − ೧೦</span></div>
+      <div class="trow"><span class="n1 en">+30 = +50 − 20</span><span class="n1 kn">+೩೦ = +೫೦ − ೨೦</span></div>
+      <div class="trow"><span class="n1 en">+20 = +50 − 30</span><span class="n1 kn">+೨೦ = +೫೦ − ೩೦</span></div>
+      <div class="trow"><span class="n1 en">+10 = +50 − 40</span><span class="n1 kn">+೧೦ = +೫೦ − ೪೦</span></div>
+    </div>
+    <div class="tcard" style="--bc:#FF6B9D">
+      <h3 class="en">➖ Removing (10 to 40)</h3>
+      <h3 class="kn">➖ ಕಳೆಯುವುದು (೧೦ ರಿಂದ ೪೦)</h3>
+      <div class="trow"><span class="n1 en">−40 = +10 − 50</span><span class="n1 kn">−೪೦ = +೧೦ − ೫೦</span></div>
+      <div class="trow"><span class="n1 en">−30 = +20 − 50</span><span class="n1 kn">−೩೦ = +೨೦ − ೫೦</span></div>
+      <div class="trow"><span class="n1 en">−20 = +30 − 50</span><span class="n1 kn">−೨೦ = +೩೦ − ೫೦</span></div>
+      <div class="trow"><span class="n1 en">−10 = +40 − 50</span><span class="n1 kn">−೧೦ = +೪೦ − ೫೦</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════ COMBO FRIENDS ══════════ -->
+  <div class="sec-title"><span class="pill" style="--c:#4361EE">🤜🤛 Combo Friends!</span></div>
+
+  <div class="intro-card" style="--bc:#4361EE; --tc:#4361EE">
+    <div class="big-emoji">🤜🤛</div>
+    <h2 class="en">What are "Combo Friends"? 🤔</h2>
+    <h2 class="kn">"ಕಾಂಬೋ ಗೆಳೆಯರು" ಅಂದರೆ? 🤔</h2>
+    <p class="en">
+      We already know <span class="hl">10-Friends</span> (9+1, 8+2...) from Level I!<br><br>
+      Now <strong>Combo Friends</strong> are the leftover numbers — the ones that need <strong>BOTH</strong><br>
+      Big Brother (10) AND Small Sister (5) to help! 🙌<br><br>
+      These are the numbers <strong>6, 7, 8, 9</strong> — they use a special two-step trick!<br><br>
+      <strong>Combo Friends:</strong> 9↔4 · 8↔3 · 7↔2 · 6↔1<br>
+      <strong>For tens:</strong> 90↔40 · 80↔30 · 70↔20 · 60↔10
+    </p>
+    <p class="kn">
+      ನಾವು ಈಗಾಗಲೇ ಲೆವೆಲ್ I ನಲ್ಲಿ <span class="hl">೧೦ ರ ಗೆಳೆಯರನ್ನು</span> ಕಲಿತಿದ್ದೇವೆ!<br><br>
+      ಈಗ <strong>ಕಾಂಬೋ ಗೆಳೆಯರು</strong> — ಇವರಿಗೆ <strong>ದೊಡ್ಡಣ್ಣ (೧೦)</strong> ಮತ್ತು <strong>ಸಣ್ಣ ತಂಗಿ (೫)</strong><br>
+      ಇಬ್ಬರ ಸಹಾಯ ಬೇಕು! 🙌<br><br>
+      ಇವು <strong>೬, ೭, ೮, ೯</strong> ಸಂಖ್ಯೆಗಳು — ಎರಡು ಹೆಜ್ಜೆ ತಂತ್ರ ಬೇಕು!<br><br>
+      <strong>ಕಾಂಬೋ ಗೆಳೆಯರು:</strong> ೯↔೪ · ೮↔೩ · ೭↔೨ · ೬↔೧<br>
+      <strong>ಹತ್ತಿಗೆ:</strong> ೯೦↔೪೦ · ೮೦↔೩೦ · ೭೦↔೨೦ · ೬೦↔೧೦
+    </p>
+  </div>
+
+  <div class="twin">
+    <div class="tcard" style="--bc:#4361EE">
+      <h3 class="en">🤜🤛 Combo Friends (1–9)</h3>
+      <h3 class="kn">🤜🤛 ಕಾಂಬೋ ಗೆಳೆಯರು (೧–೯)</h3>
+      <div class="trow"><span class="n1">9</span><span class="arr">↔</span><span class="n2">4</span></div>
+      <div class="trow"><span class="n1">8</span><span class="arr">↔</span><span class="n2">3</span></div>
+      <div class="trow"><span class="n1">7</span><span class="arr">↔</span><span class="n2">2</span></div>
+      <div class="trow"><span class="n1">6</span><span class="arr">↔</span><span class="n2">1</span></div>
+    </div>
+    <div class="tcard" style="--bc:#06D6A0">
+      <h3 class="en">🤜🤛 Combo Friends (10–90)</h3>
+      <h3 class="kn">🤜🤛 ಕಾಂಬೋ ಗೆಳೆಯರು (೧೦–೯೦)</h3>
+      <div class="trow"><span class="n1">90</span><span class="arr">↔</span><span class="n2">40</span></div>
+      <div class="trow"><span class="n1">80</span><span class="arr">↔</span><span class="n2">30</span></div>
+      <div class="trow"><span class="n1">70</span><span class="arr">↔</span><span class="n2">20</span></div>
+      <div class="trow"><span class="n1">60</span><span class="arr">↔</span><span class="n2">10</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════ COMBO FORMULA ══════════ -->
+  <div class="sec-title"><span class="pill" style="--c:#FF9F43">⚡ Combo Formula (Big B + Small Sis together!)</span></div>
+
+  <div class="intro-card" style="--bc:#FF9F43; --tc:#FF9F43">
+    <div class="big-emoji">⚡</div>
+    <h2 class="en">The Super Combo Trick! 🚀</h2>
+    <h2 class="kn">ಸೂಪರ್ ಕಾಂಬೋ ತಂತ್ರ! 🚀</h2>
+    <p class="en">
+      When a number needs <strong>BOTH</strong> Big Brother AND Small Sister together,<br>
+      that's the <strong>Combo Formula!</strong> 🎉<br><br>
+      For <strong>+9</strong>: Add 10 (Big Bro) AND Add 5 (Small Sis) AND Remove 6 (combo friend)<br>
+      👉 <strong>+9 = +4 − 5 + 10</strong><br><br>
+      Think of it as: <em>"Ask both helpers at once!"</em> 💪
+    </p>
+    <p class="kn">
+      ಒಂದು ಸಂಖ್ಯೆಗೆ <strong>ದೊಡ್ಡಣ್ಣ ಮತ್ತು ಸಣ್ಣ ತಂಗಿ ಇಬ್ಬರೂ</strong> ಬೇಕಾದರೆ,<br>
+      ಅದೇ <strong>ಕಾಂಬೋ ಸೂತ್ರ!</strong> 🎉<br><br>
+      <strong>+೯</strong> ಗೆ: ದೊಡ್ಡಣ್ಣ ೧೦ ಕೊಡ್ತಾನೆ + ಸಣ್ಣ ತಂಗಿ ೫ ಕೊಡ್ತಾಳೆ − ೬ ತೆಗೆ<br>
+      👉 <strong>+೯ = +೪ − ೫ + ೧೦</strong><br><br>
+      ಹೀಗೆ ನೆನಪಿಡು: <em>"ಇಬ್ಬರ ಸಹಾಯ ಒಟ್ಟಿಗೆ ತೆಗೆದುಕೋ!"</em> 💪
+    </p>
+  </div>
+
+  <!-- COMBO ADD 6-9 -->
+  <div class="sec-title"><span class="pill" style="--c:#FF6B9D">➕ Combo Adding (6 to 9)</span></div>
+  <div class="fi-banner" style="background:linear-gradient(135deg,#FF6B9D,#FF9F43)">
+    <span class="fit en">⚡ Big Brother + Small Sister TOGETHER for adding!</span>
+    <span class="fit kn">⚡ ದೊಡ್ಡಣ್ಣ + ಸಣ್ಣ ತಂಗಿ ಒಟ್ಟಿಗೆ ಕೂಡಿಸಲು!</span>
+    <span class="en">Add 10 (Big Bro) · Remove 5 (give back Small Sis) · Add combo friend</span>
+    <span class="kn">೧೦ ಸೇರಿಸು (ದೊಡ್ಡಣ್ಣ) · ೫ ತೆಗೆ (ಸಣ್ಣ ತಂಗಿ ವಾಪಸ್) · ಕಾಂಬೋ ಗೆಳೆಯ ಸೇರಿಸು</span>
+  </div>
+  <div class="combo-grid">
+    <div class="combo-card" style="--cc:#FF6B9D">
+      <span class="ce">🍎</span>
+      <div class="cm en">+9 = +4 − 5 + 10</div>
+      <div class="cm kn">+೯ = +೪ − ೫ + ೧೦</div>
+      <div class="cp en">Add combo friend 4,<br>Remove Small Sis 5,<br>Add Big Bro 10</div>
+      <div class="cp kn">ಕಾಂಬೋ ೪ ಸೇರಿಸು,<br>ತಂಗಿ ೫ ತೆಗೆ,<br>ಅಣ್ಣ ೧೦ ಸೇರಿಸು</div>
+    </div>
+    <div class="combo-card" style="--cc:#FF9F43">
+      <span class="ce">🍊</span>
+      <div class="cm en">+8 = +3 − 5 + 10</div>
+      <div class="cm kn">+೮ = +೩ − ೫ + ೧೦</div>
+      <div class="cp en">Add combo friend 3,<br>Remove Small Sis 5,<br>Add Big Bro 10</div>
+      <div class="cp kn">ಕಾಂಬೋ ೩ ಸೇರಿಸು,<br>ತಂಗಿ ೫ ತೆಗೆ,<br>ಅಣ್ಣ ೧೦ ಸೇರಿಸು</div>
+    </div>
+    <div class="combo-card" style="--cc:#FFD93D">
+      <span class="ce">🍋</span>
+      <div class="cm en">+7 = +2 − 5 + 10</div>
+      <div class="cm kn">+೭ = +೨ − ೫ + ೧೦</div>
+      <div class="cp en">Add combo friend 2,<br>Remove Small Sis 5,<br>Add Big Bro 10</div>
+      <div class="cp kn">ಕಾಂಬೋ ೨ ಸೇರಿಸು,<br>ತಂಗಿ ೫ ತೆಗೆ,<br>ಅಣ್ಣ ೧೦ ಸೇರಿಸು</div>
+    </div>
+    <div class="combo-card" style="--cc:#06D6A0">
+      <span class="ce">🍀</span>
+      <div class="cm en">+6 = +1 − 5 + 10</div>
+      <div class="cm kn">+೬ = +೧ − ೫ + ೧೦</div>
+      <div class="cp en">Add combo friend 1,<br>Remove Small Sis 5,<br>Add Big Bro 10</div>
+      <div class="cp kn">ಕಾಂಬೋ ೧ ಸೇರಿಸು,<br>ತಂಗಿ ೫ ತೆಗೆ,<br>ಅಣ್ಣ ೧೦ ಸೇರಿಸು</div>
+    </div>
+  </div>
+
+  <!-- COMBO REMOVE 6-9 -->
+  <div class="sec-title"><span class="pill" style="--c:#4361EE">➖ Combo Removing (6 to 9)</span></div>
+  <div class="fi-banner" style="background:linear-gradient(135deg,#4361EE,#A855F7)">
+    <span class="fit en">⚡ Big Brother + Small Sister TOGETHER for removing!</span>
+    <span class="fit kn">⚡ ದೊಡ್ಡಣ್ಣ + ಸಣ್ಣ ತಂಗಿ ಒಟ್ಟಿಗೆ ಕಳೆಯಲು!</span>
+    <span class="en">Remove 10 (Big Bro) · Add back 5 (Small Sis helps) · Remove combo friend</span>
+    <span class="kn">೧೦ ತೆಗೆ (ದೊಡ್ಡಣ್ಣ) · ೫ ವಾಪಸ್ ಹಾಕು (ಸಣ್ಣ ತಂಗಿ) · ಕಾಂಬೋ ಗೆಳೆಯ ತೆಗೆ</span>
+  </div>
+  <div class="combo-grid">
+    <div class="combo-card" style="--cc:#4361EE">
+      <span class="ce">🫐</span>
+      <div class="cm en">−9 = −10 + 5 − 4</div>
+      <div class="cm kn">−೯ = −೧೦ + ೫ − ೪</div>
+      <div class="cp en">Remove Big Bro 10,<br>Add back Small Sis 5,<br>Remove combo 4</div>
+      <div class="cp kn">ಅಣ್ಣ ೧೦ ತೆಗೆ,<br>ತಂಗಿ ೫ ವಾಪಸ್,<br>ಕಾಂಬೋ ೪ ತೆಗೆ</div>
+    </div>
+    <div class="combo-card" style="--cc:#A855F7">
+      <span class="ce">🍇</span>
+      <div class="cm en">−8 = −10 + 5 − 3</div>
+      <div class="cm kn">−೮ = −೧೦ + ೫ − ೩</div>
+      <div class="cp en">Remove Big Bro 10,<br>Add back Small Sis 5,<br>Remove combo 3</div>
+      <div class="cp kn">ಅಣ್ಣ ೧೦ ತೆಗೆ,<br>ತಂಗಿ ೫ ವಾಪಸ್,<br>ಕಾಂಬೋ ೩ ತೆಗೆ</div>
+    </div>
+    <div class="combo-card" style="--cc:#EC4899">
+      <span class="ce">🌸</span>
+      <div class="cm en">−7 = −10 + 5 − 2</div>
+      <div class="cm kn">−೭ = −೧೦ + ೫ − ೨</div>
+      <div class="cp en">Remove Big Bro 10,<br>Add back Small Sis 5,<br>Remove combo 2</div>
+      <div class="cp kn">ಅಣ್ಣ ೧೦ ತೆಗೆ,<br>ತಂಗಿ ೫ ವಾಪಸ್,<br>ಕಾಂಬೋ ೨ ತೆಗೆ</div>
+    </div>
+    <div class="combo-card" style="--cc:#FF9F43">
+      <span class="ce">🌻</span>
+      <div class="cm en">−6 = −10 + 5 − 1</div>
+      <div class="cm kn">−೬ = −೧೦ + ೫ − ೧</div>
+      <div class="cp en">Remove Big Bro 10,<br>Add back Small Sis 5,<br>Remove combo 1</div>
+      <div class="cp kn">ಅಣ್ಣ ೧೦ ತೆಗೆ,<br>ತಂಗಿ ೫ ವಾಪಸ್,<br>ಕಾಂಬೋ ೧ ತೆಗೆ</div>
+    </div>
+  </div>
+
+  <!-- COMBO 60-90 -->
+  <div class="sec-title"><span class="pill" style="--c:#06D6A0">💯 Combo Formula for Tens (60 to 90)</span></div>
+  <div class="twin">
+    <div class="tcard" style="--bc:#06D6A0">
+      <h3 class="en">➕ Adding (60 to 90)</h3>
+      <h3 class="kn">➕ ಕೂಡಿಸುವುದು (೬೦ ರಿಂದ ೯೦)</h3>
+      <div class="trow"><span class="n1 en">+90 = +40−50+100</span><span class="n1 kn">+೯೦ = +೪೦−೫೦+೧೦೦</span></div>
+      <div class="trow"><span class="n1 en">+80 = +30−50+100</span><span class="n1 kn">+೮೦ = +೩೦−೫೦+೧೦೦</span></div>
+      <div class="trow"><span class="n1 en">+70 = +20−50+100</span><span class="n1 kn">+೭೦ = +೨೦−೫೦+೧೦೦</span></div>
+      <div class="trow"><span class="n1 en">+60 = +10−50+100</span><span class="n1 kn">+೬೦ = +೧೦−೫೦+೧೦೦</span></div>
+    </div>
+    <div class="tcard" style="--bc:#4CC9F0">
+      <h3 class="en">➖ Removing (60 to 90)</h3>
+      <h3 class="kn">➖ ಕಳೆಯುವುದು (೬೦ ರಿಂದ ೯೦)</h3>
+      <div class="trow"><span class="n1 en">−90 = −100+50−40</span><span class="n1 kn">−೯೦ = −೧೦೦+೫೦−೪೦</span></div>
+      <div class="trow"><span class="n1 en">−80 = −100+50−30</span><span class="n1 kn">−೮೦ = −೧೦೦+೫೦−೩೦</span></div>
+      <div class="trow"><span class="n1 en">−70 = −100+50−20</span><span class="n1 kn">−೭೦ = −೧೦೦+೫೦−೨೦</span></div>
+      <div class="trow"><span class="n1 en">−60 = −100+50−10</span><span class="n1 kn">−೬೦ = −೧೦೦+೫೦−೧೦</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- STORY EXAMPLES -->
+  <div class="sec-title"><span class="pill" style="--c:#FF9F43">🌈 Fun Story Examples!</span></div>
+  <div class="sgrid">
+    <div class="scard" style="--sc:#FF6B9D; --sbg:#FFF0F6">
+      <span class="se">🍭</span>
+      <h4 class="en">Candy Story (+4, Small Sis)</h4>
+      <h4 class="kn">ಮಿಠಾಯಿ ಕಥೆ (+೪, ಸಣ್ಣ ತಂಗಿ)</h4>
+      <p class="en">Riya has <strong>3 candies</strong>. She gets <strong>4 more</strong>!<br>No room on abacus for 4!<br>Small Sister helps 👧:<br><strong>Add 5, Remove 1</strong><br>3 + 5 = 8 → 8 − 1 = <strong>7!</strong></p>
+      <p class="kn">ರಿಯಾ ಬಳಿ <strong>೩ ಮಿಠಾಯಿ</strong> ಇದೆ. ಇನ್ನು <strong>೪ ಸಿಕ್ಕಿತು</strong>!<br>ಜಾಗ ಇಲ್ಲ! ಸಣ್ಣ ತಂಗಿ ಸಹಾಯ 👧:<br><strong>೫ ಸೇರಿಸು, ೧ ತೆಗೆ</strong><br>೩ + ೫ = ೮ → ೮ − ೧ = <strong>೭!</strong></p>
+      <span class="ans en">🎉 Answer = 7 candies!</span>
+      <span class="ans kn">🎉 ಉತ್ತರ = ೭ ಮಿಠಾಯಿ!</span>
+    </div>
+    <div class="scard" style="--sc:#4361EE; --sbg:#F0F0FF">
+      <span class="se">🏀</span>
+      <h4 class="en">Ball Story (+9, Combo!)</h4>
+      <h4 class="kn">ಚೆಂಡು ಕಥೆ (+೯, ಕಾಂಬೋ!)</h4>
+      <p class="en">Arjun has <strong>6 balls</strong>. He gets <strong>9 more</strong>!<br>Need Big Bro + Small Sis together!<br><strong>+4 − 5 + 10</strong><br>6+4=10 → 10−5=5 → 5+10=<strong>15!</strong></p>
+      <p class="kn">ಅರ್ಜುನ್ ಬಳಿ <strong>೬ ಚೆಂಡು</strong> ಇದೆ. ಇನ್ನು <strong>೯ ಬಂತು</strong>!<br>ದೊಡ್ಡಣ್ಣ + ಸಣ್ಣ ತಂಗಿ ಬೇಕು!<br><strong>+೪ − ೫ + ೧೦</strong><br>೬+೪=೧೦ → ೧೦−೫=೫ → ೫+೧೦=<strong>೧೫!</strong></p>
+      <span class="ans en">🎉 Answer = 15 balls!</span>
+      <span class="ans kn">🎉 ಉತ್ತರ = ೧೫ ಚೆಂಡು!</span>
+    </div>
+    <div class="scard" style="--sc:#06D6A0; --sbg:#F0FFF8">
+      <span class="se">🌺</span>
+      <h4 class="en">Flower Story (−3, Small Sis)</h4>
+      <h4 class="kn">ಹೂವಿನ ಕಥೆ (−೩, ಸಣ್ಣ ತಂಗಿ)</h4>
+      <p class="en">Meena has <strong>5 flowers</strong>. She gives away <strong>3</strong>!<br>Small Sister helps 👧:<br><strong>Add back 2, Remove 5</strong><br>5+2=7 → 7−5=<strong>2!</strong></p>
+      <p class="kn">ಮೀನಾ ಬಳಿ <strong>೫ ಹೂ</strong> ಇದೆ. <strong>೩ ಕೊಟ್ಟಳು</strong>!<br>ಸಣ್ಣ ತಂಗಿ ಸಹಾಯ 👧:<br><strong>೨ ವಾಪಸ್, ೫ ತೆಗೆ</strong><br>೫+೨=೭ → ೭−೫=<strong>೨!</strong></p>
+      <span class="ans en">🎉 Answer = 2 flowers!</span>
+      <span class="ans kn">🎉 ಉತ್ತರ = ೨ ಹೂಗಳು!</span>
+    </div>
+    <div class="scard" style="--sc:#A855F7; --sbg:#F8F0FF">
+      <span class="se">🚗</span>
+      <h4 class="en">Car Story (−7, Combo!)</h4>
+      <h4 class="kn">ಕಾರು ಕಥೆ (−೭, ಕಾಂಬೋ!)</h4>
+      <p class="en">Sam has <strong>14 toy cars</strong>. He lost <strong>7</strong>!<br>Combo trick: <strong>−10 + 5 − 2</strong><br>14−10=4 → 4+5=9 → 9−2=<strong>7!</strong></p>
+      <p class="kn">ಸ್ಯಾಮ್ ಬಳಿ <strong>೧೪ ಆಟಿಕೆ ಕಾರು</strong> ಇದೆ. <strong>೭ ಕಳೆದುಹೋದವು</strong>!<br>ಕಾಂಬೋ: <strong>−೧೦ + ೫ − ೨</strong><br>೧೪−೧೦=೪ → ೪+೫=೯ → ೯−೨=<strong>೭!</strong></p>
+      <span class="ans en">🎉 Answer = 7 cars!</span>
+      <span class="ans kn">🎉 ಉತ್ತರ = ೭ ಕಾರು!</span>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="sec-title"><span class="pill" style="--c:#FFD93D">⭐ Quick Tips to Remember!</span></div>
+  <div class="tgrid">
+    <div class="tipcard" style="--tc2:#FF6B9D">
+      <div class="ti">👧</div>
+      <h4 class="en">Small Sister = 5</h4>
+      <h4 class="kn">ಸಣ್ಣ ತಂಗಿ = ೫</h4>
+      <p class="en">She always gives or takes 5. She helps with numbers 1, 2, 3, 4!</p>
+      <p class="kn">ಅವಳು ಯಾವಾಗಲೂ ೫ ಕೊಡ್ತಾಳೆ. ೧, ೨, ೩, ೪ ಗೆ ಸಹಾಯ!</p>
+    </div>
+    <div class="tipcard" style="--tc2:#4361EE">
+      <div class="ti">🤜🤛</div>
+      <h4 class="en">Combo = 6,7,8,9</h4>
+      <h4 class="kn">ಕಾಂಬೋ = ೬,೭,೮,೯</h4>
+      <p class="en">These need BOTH Big Brother AND Small Sister. Two helpers together!</p>
+      <p class="kn">ಇವಕ್ಕೆ ದೊಡ್ಡಣ್ಣ ಮತ್ತು ಸಣ್ಣ ತಂಗಿ ಇಬ್ಬರೂ ಬೇಕು!</p>
+    </div>
+    <div class="tipcard" style="--tc2:#06D6A0">
+      <div class="ti">🧠</div>
+      <h4 class="en">3 Steps for Combo</h4>
+      <h4 class="kn">ಕಾಂಬೋಗೆ ೩ ಹೆಜ್ಜೆ</h4>
+      <p class="en">Step 1: Combo friend. Step 2: Small Sister (±5). Step 3: Big Brother (±10)</p>
+      <p class="kn">ಹೆಜ್ಜೆ ೧: ಕಾಂಬೋ. ಹೆಜ್ಜೆ ೨: ಸಣ್ಣ ತಂಗಿ (±೫). ಹೆಜ್ಜೆ ೩: ದೊಡ್ಡಣ್ಣ (±೧೦)</p>
+    </div>
+    <div class="tipcard" style="--tc2:#FF9F43">
+      <div class="ti">🎵</div>
+      <h4 class="en">Sing the Friends!</h4>
+      <h4 class="kn">ಹಾಡಿ ಕಲಿಯಿರಿ!</h4>
+      <p class="en">"9's combo is 4, 8's combo is 3, 7's combo is 2, 6's combo is 1!"</p>
+      <p class="kn">"೯ ರ ಕಾಂಬೋ ೪, ೮ ರ ಕಾಂಬೋ ೩, ೭ ರ ಕಾಂಬೋ ೨, ೬ ರ ಕಾಂಬೋ ೧!"</p>
+    </div>
+    <div class="tipcard" style="--tc2:#A855F7">
+      <div class="ti">🖐</div>
+      <h4 class="en">Use Both Hands!</h4>
+      <h4 class="kn">ಎರಡು ಕೈ ಬಳಸಿ!</h4>
+      <p class="en">One hand = Small Sister (5 fingers). Other hand = Big Brother (10 total)!</p>
+      <p class="kn">ಒಂದು ಕೈ = ಸಣ್ಣ ತಂಗಿ (೫ ಬೆರಳು). ಇನ್ನೊಂದು = ದೊಡ್ಡಣ್ಣ (೧೦)!</p>
+    </div>
+    <div class="tipcard" style="--tc2:#FFD93D">
+      <div class="ti">🌟</div>
+      <h4 class="en">Practice Daily!</h4>
+      <h4 class="kn">ಪ್ರತಿದಿನ ಅಭ್ಯಾಸ!</h4>
+      <p class="en">15 minutes every day makes you a Level II champion! You can do it! 🏆</p>
+      <p class="kn">ಪ್ರತಿದಿನ ೧೫ ನಿಮಿಷ ಅಭ್ಯಾಸ — ಲೆವೆಲ್ II ಚಾಂಪಿಯನ್ ಆಗ್ತೀಯ! 🏆</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="en">🏆 You completed Runners Level II! 🏆</span>
+    <span class="kn">🏆 ರನ್ನರ್ಸ್ ಲೆವೆಲ್ II ಮುಗಿಸಿದೆ! 🏆</span>
+    <p class="en">Big Brother + Small Sister + Combo = You're a Maths Superstar! 🌟🚀</p>
+    <p class="kn">ದೊಡ್ಡಣ್ಣ + ಸಣ್ಣ ತಂಗಿ + ಕಾಂಬೋ = ನೀನು ಗಣಿತ ಸೂಪರ್‌ಸ್ಟಾರ್! 🌟🚀</p>
+  </div>
+
+</div>
+
+<script>
+function setLang(lang) {
+  const main = document.getElementById('main');
+  main.className = main.className.replace(/show-\w+/g, '').trim();
+  main.classList.add('show-' + lang);
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-kn').classList.toggle('active', lang === 'kn');
+}
+</script>
+</body>
+</html>
