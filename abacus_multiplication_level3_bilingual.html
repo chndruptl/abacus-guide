@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abacus Multiplication - Level III</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Kannada:wght@400;700;900&family=Noto+Sans+Kannada:wght@400;600;700;800&family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:    #E63946;
+    --orange: #F4A261;
+    --yellow: #FFD93D;
+    --teal:   #2EC4B6;
+    --blue:   #3A86FF;
+    --purple: #8338EC;
+    --green:  #06D6A0;
+    --pink:   #FF6B9D;
+    --dark:   #1A1A2E;
+    --darker: #16213E;
+    --card:   #0F3460;
+    --card2:  #1A1A4E;
+    --text:   #E8E8F0;
+    --text2:  #A0A0C0;
+    --gold:   #FFD700;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+    font-family: 'Noto Sans Kannada', 'Nunito', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Starfield */
+  body::before {
+    content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧';
+    position: fixed; top: 0; left: 0; right: 0;
+    font-size: 12px; letter-spacing: 20px; opacity: 0.08;
+    pointer-events: none; word-break: break-all; line-height: 3; z-index: 0; color: #FFD700;
+  }
+
+  .page { max-width: 980px; margin: 0 auto; padding: 24px 16px 80px; position: relative; z-index: 1; }
+
+  /* LANG TOGGLE */
+  .lang-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
+  .lang-btn {
+    padding: 10px 28px; border-radius: 50px;
+    border: 2px solid var(--gold);
+    background: transparent; color: var(--gold);
+    font-family: 'Noto Sans Kannada','Nunito',sans-serif; font-size: 15px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .lang-btn.active { background: var(--gold); color: #1a1a00; box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+  .lang-btn:hover:not(.active) { background: rgba(255,215,0,0.1); }
+  .en, .kn { display: none; }
+  .show-en .en { display: block; }
+  .show-kn .kn { display: block; }
+  span.en, span.kn { display: inline; }
+  .show-en span.kn, .show-kn span.en { display: none; }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    background: linear-gradient(135deg, #E63946, #F4A261, #FFD93D);
+    border-radius: 28px; padding: 36px 24px; margin-bottom: 32px;
+    box-shadow: 0 16px 60px rgba(230,57,70,0.5);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 2px, transparent 2px, transparent 14px);
+  }
+  .hero-emoji { font-size: 64px; display: block; animation: spin-bounce 2s ease-in-out infinite; }
+  @keyframes spin-bounce { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-12px) rotate(5deg)} }
+  .hero h1 {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: clamp(24px,5vw,48px); color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.2); line-height: 1.15; margin-top: 8px;
+  }
+  .hero p { font-size: clamp(13px,2.5vw,16px); color: rgba(255,255,255,0.92); margin-top: 10px; font-weight: 700; }
+  .level-badge {
+    display: inline-block; background: white; color: var(--red);
+    font-family: 'Fredoka One','Noto Serif Kannada',serif; font-size: 15px; font-weight: 900;
+    padding: 7px 22px; border-radius: 20px; margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  }
+
+  /* SECTION TITLE */
+  .sec-title {
+    text-align: center; margin: 36px 0 18px;
+  }
+  .sec-title .pill {
+    background: var(--c,#FFD93D); color: white;
+    padding: 9px 24px; border-radius: 50px;
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: clamp(16px,3vw,24px); font-weight: 900;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    display: inline-block;
+  }
+
+  /* GLASS CARD */
+  .gcard {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px; padding: 24px 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .gcard h2 {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: clamp(18px,3.5vw,26px); font-weight: 900;
+    color: var(--gold); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .gcard p, .gcard li {
+    font-size: clamp(13px,2.2vw,15px); line-height: 2;
+    color: var(--text); font-weight: 600;
+  }
+  .gcard ul { padding-left: 22px; }
+  .gcard li { margin-bottom: 6px; }
+  .hl { background: var(--gold); color: #1a1a00; border-radius: 6px; padding: 1px 8px; font-weight: 800; display: inline-block; }
+  .hl-red   { background: var(--red);   color: white; border-radius: 6px; padding: 1px 8px; font-weight: 800; display: inline-block; }
+  .hl-teal  { background: var(--teal);  color: white; border-radius: 6px; padding: 1px 8px; font-weight: 800; display: inline-block; }
+  .hl-blue  { background: var(--blue);  color: white; border-radius: 6px; padding: 1px 8px; font-weight: 800; display: inline-block; }
+  .hl-green { background: var(--green); color: white; border-radius: 6px; padding: 1px 8px; font-weight: 800; display: inline-block; }
+
+  /* ABACUS DIAGRAM */
+  .abacus-diagram {
+    background: linear-gradient(160deg, #3a2810, #1e1408);
+    border: 2px solid #6a5030; border-radius: 16px;
+    padding: 16px 12px; margin: 18px 0;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    overflow-x: auto;
+  }
+  .abacus-inner-diag {
+    min-width: 540px;
+    position: relative;
+  }
+  .col-labels {
+    display: flex; justify-content: space-around;
+    padding: 0 10px 8px;
+  }
+  .col-label {
+    flex: 1; text-align: center;
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 11px; color: var(--gold); font-weight: 900;
+  }
+  .col-label small { display: block; font-size: 9px; color: var(--text2); }
+  .rail-top, .rail-bot {
+    height: 10px;
+    background: linear-gradient(180deg,#8a6a3a,#5a4220);
+    border-radius: 5px; margin: 0 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .bead-area { display: flex; padding: 6px 4px; gap: 0; }
+  .bcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+  .bcol::before {
+    content: ''; position: absolute; top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 4px; background: linear-gradient(180deg,#3a2e18,#1a1408);
+    border-radius: 2px; z-index: 0;
+  }
+  .bead-up { width: 78%; max-width: 40px; height: 18px; border-radius: 9px; z-index: 1; }
+  .bead-lo { width: 78%; max-width: 40px; height: 18px; border-radius: 9px; z-index: 1; }
+  .bead-up.off { background: linear-gradient(160deg,#c07818,#8a5010); opacity: 0.5; }
+  .bead-up.on  { background: linear-gradient(160deg,#FFD060,#E09030); box-shadow: 0 0 8px rgba(255,208,96,0.6); }
+  .bead-lo.off { background: linear-gradient(160deg,#c07818,#8a5010); opacity: 0.5; }
+  .bead-lo.on  { background: linear-gradient(160deg,#FFD060,#E09030); box-shadow: 0 0 8px rgba(255,208,96,0.6); }
+  .bead-lo.hi  { background: linear-gradient(160deg,#60e8ff,#20a8c0); box-shadow: 0 0 8px rgba(96,232,255,0.6); }
+  .reckoning { height: 10px; background: linear-gradient(180deg,#9a7a42,#6a5028); margin: 4px -4px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+  .col-val {
+    text-align: center; font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 14px; color: var(--gold); padding-top: 6px;
+  }
+  .col-pointer { font-size: 18px; }
+  .pointer-label {
+    display: flex; justify-content: space-around; padding: 6px 10px 0;
+  }
+  .pointer-label span {
+    flex: 1; text-align: center; font-size: 11px;
+    color: var(--text2); font-family: 'Nunito',sans-serif;
+  }
+  .pointer-label span.active { color: var(--red); font-weight: 900; font-size: 12px; }
+
+  /* STEP CARD */
+  .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+  .step {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 16px 14px;
+    transition: transform 0.15s;
+  }
+  .step:hover { transform: translateX(4px); }
+  .step-num {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--c, #E63946);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One',serif; font-size: 18px; font-weight: 900;
+    color: white; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .step-body { flex: 1; }
+  .step-body h4 {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 16px; font-weight: 900; color: var(--gold); margin-bottom: 6px;
+  }
+  .step-body p { font-size: 13px; line-height: 1.9; color: var(--text); font-weight: 600; }
+
+  /* EXAMPLE WALKTHROUGH */
+  .example-box {
+    border-radius: 22px; padding: 22px 18px; margin-bottom: 20px;
+    border: 2px solid var(--bc, #E63946);
+    background: rgba(230,57,70,0.08);
+  }
+  .example-box .ex-title {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: clamp(18px,3.5vw,26px); font-weight: 900;
+    color: var(--bc, #E63946); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .calc-row {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.06); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .calc-step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bc, #E63946);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; color: white; flex-shrink: 0;
+  }
+  .calc-text { font-size: 13px; font-weight: 700; line-height: 1.7; flex: 1; }
+  .calc-result {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 15px; font-weight: 900; color: var(--green);
+  }
+
+  /* PLACE VALUE TABLE */
+  .pv-table {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; overflow: hidden; margin-bottom: 18px;
+  }
+  .pv-table table { width: 100%; border-collapse: collapse; }
+  .pv-table th {
+    background: rgba(255,215,0,0.15); padding: 10px 12px;
+    text-align: center; font-size: 12px; color: var(--gold);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+  }
+  .pv-table td {
+    padding: 10px 12px; font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    text-align: center; font-weight: 700;
+  }
+  .pv-table tr:last-child td { border-bottom: none; }
+  .pv-table tr:hover td { background: rgba(255,255,255,0.04); }
+  .pv-table td.active { color: var(--red); font-weight: 900; font-size: 15px; }
+
+  /* MINI GRID */
+  .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; margin-bottom: 20px; }
+  .mcard {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 16px 12px; text-align: center;
+    transition: transform 0.18s;
+  }
+  .mcard:hover { transform: translateY(-3px); }
+  .mcard .me { font-size: 28px; margin-bottom: 8px; }
+  .mcard h4 {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 15px; font-weight: 900; color: var(--gold); margin-bottom: 6px;
+  }
+  .mcard p { font-size: 12px; color: var(--text2); font-weight: 600; line-height: 1.6; }
+
+  /* ANSWER BOX */
+  .ans-box {
+    background: linear-gradient(135deg, rgba(6,214,160,0.2), rgba(58,134,255,0.2));
+    border: 2px solid var(--green); border-radius: 16px;
+    padding: 16px 18px; text-align: center; margin: 14px 0;
+  }
+  .ans-box .ans-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; font-weight: 700; }
+  .ans-box .ans-num {
+    font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 32px; font-weight: 900; color: var(--green);
+    text-shadow: 0 0 20px rgba(6,214,160,0.5);
+  }
+
+  /* DIVIDER */
+  .divider { height: 3px; border-radius: 2px; margin: 32px 0; background: linear-gradient(90deg,var(--red),var(--orange),var(--yellow)); }
+
+  /* TIPS */
+  .tgrid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 12px; margin-bottom: 28px; }
+  .tipcard {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px; padding: 16px 12px; text-align: center;
+  }
+  .tipcard .ti { font-size: 30px; margin-bottom: 8px; }
+  .tipcard h4 { font-family: 'Fredoka One','Noto Serif Kannada',serif; font-size: 14px; font-weight: 900; color: var(--c,var(--gold)); margin-bottom: 6px; }
+  .tipcard p  { font-size: 11px; color: var(--text2); font-weight: 600; line-height: 1.7; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    background: linear-gradient(135deg,#E63946,#F4A261);
+    border-radius: 24px; padding: 28px;
+    color: white; font-family: 'Fredoka One','Noto Serif Kannada',serif;
+    font-size: 22px; font-weight: 900;
+    box-shadow: 0 10px 40px rgba(230,57,70,0.4);
+  }
+  .footer p { font-size: 13px; font-family: 'Noto Sans Kannada','Nunito',sans-serif; font-weight: 700; margin-top: 8px; opacity: 0.92; }
+</style>
+</head>
+<body>
+<div class="page show-en" id="main">
+
+  <!-- LANG TOGGLE -->
+  <div class="lang-bar">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+    <button class="lang-btn" id="btn-kn" onclick="setLang('kn')">🇮🇳 ಕನ್ನಡ</button>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="hero-emoji">✖️</span>
+    <h1 class="en">Abacus Multiplication!</h1>
+    <h1 class="kn">ಅಬ್ಯಾಕಸ್ ಗುಣಾಕಾರ!</h1>
+    <p class="en">Runners Level III · Sprinters Level II 🏆</p>
+    <p class="kn">ರನ್ನರ್ಸ್ ಲೆವೆಲ್ III · ಸ್ಪ್ರಿಂಟರ್ಸ್ ಲೆವೆಲ್ II 🏆</p>
+    <div class="level-badge en">🔢 Step-by-Step Multiplication on Abacus</div>
+    <div class="level-badge kn">🔢 ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ಹಂತ ಹಂತ ಗುಣಾಕಾರ</div>
+  </div>
+
+  <!-- ABACUS LAYOUT INTRO -->
+  <div class="sec-title"><span class="pill" style="--c:#3A86FF">🧮 The Abacus Layout for Multiplication</span></div>
+
+  <div class="gcard">
+    <h2 class="en">📍 Column Names on the Abacus</h2>
+    <h2 class="kn">📍 ಅಬ್ಯಾಕಸ್‌ನ ಕಾಲಮ್ ಹೆಸರುಗಳು</h2>
+    <p class="en">Each column on the abacus has a special name and place value. In multiplication, we always start from the <span class="hl">middle pointer</span> and move LEFT!</p>
+    <p class="kn">ಅಬ್ಯಾಕಸ್‌ನ ಪ್ರತಿ ಕಾಲಮ್‌ಗೆ ಒಂದು ವಿಶೇಷ ಹೆಸರು ಇದೆ. ಗುಣಾಕಾರದಲ್ಲಿ ನಾವು ಯಾವಾಗಲೂ <span class="hl">ಮಧ್ಯದ ಸೂಚಿ</span>ಯಿಂದ ಎಡಕ್ಕೆ ಶುರು ಮಾಡ್ತೀವಿ!</p>
+
+    <!-- Abacus diagram -->
+    <div class="abacus-diagram">
+      <div class="abacus-inner-diag">
+        <div class="col-labels">
+          <div class="col-label">10°<br><small>TL</small></div>
+          <div class="col-label">10°<br><small>L</small></div>
+          <div class="col-label"><small>TH</small></div>
+          <div class="col-label"><small>TH</small></div>
+          <div class="col-label"><small>H</small></div>
+          <div class="col-label"><small>T</small></div>
+          <div class="col-label"><small>U</small></div>
+        </div>
+        <div class="rail-top"></div>
+        <div class="bead-area">
+          <div class="bcol"><div class="bead-up off"></div></div>
+          <div class="bcol"><div class="bead-up off"></div></div>
+          <div class="bcol"><div class="bead-up off"></div></div>
+          <div class="bcol"><div class="bead-up off"></div></div>
+          <div class="bcol"><div class="bead-up off"></div></div>
+          <div class="bcol"><div class="bead-up off"></div></div>
+          <div class="bcol"><div class="bead-up off"></div></div>
+        </div>
+        <div class="reckoning"></div>
+        <div class="bead-area">
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+          <div class="bcol"><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div><div class="bead-lo off"></div></div>
+        </div>
+        <div class="rail-top"></div>
+        <div class="pointer-label">
+          <span>Ten-Lakhs</span><span>Lakhs</span><span>Ten-Thou</span><span>Thou</span><span>Hundreds</span><span>Tens</span><span>Units</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pv-table">
+      <table>
+        <thead><tr>
+          <th class="en">Column Short</th><th class="en">Full Name</th><th class="en">Value</th>
+          <th class="kn">ಕಾಲಮ್</th><th class="kn">ಪೂರ್ಣ ಹೆಸರು</th><th class="kn">ಮೌಲ್ಯ</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="active">U</td><td class="en">Units</td><td class="kn">ಒಂದರ ಸ್ಥಾನ</td><td>1</td></tr>
+          <tr><td class="active">T</td><td class="en">Tens</td><td class="kn">ಹತ್ತರ ಸ್ಥಾನ</td><td>10</td></tr>
+          <tr><td>H</td><td class="en">Hundreds</td><td class="kn">ನೂರರ ಸ್ಥಾನ</td><td>100</td></tr>
+          <tr><td>Th</td><td class="en">Thousands</td><td class="kn">ಸಾವಿರ</td><td>1,000</td></tr>
+          <tr><td>TTh</td><td class="en">Ten-Thousands</td><td class="kn">ಹತ್ತು ಸಾವಿರ</td><td>10,000</td></tr>
+          <tr><td>L</td><td class="en">Lakhs</td><td class="kn">ಲಕ್ಷ</td><td>1,00,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- THE GOLDEN RULES -->
+  <div class="sec-title"><span class="pill" style="--c:#E63946">🌟 The 3 Golden Rules of Abacus Multiplication</span></div>
+  <div class="steps">
+    <div class="step" style="--c:#E63946">
+      <div class="step-num" style="background:#E63946">1</div>
+      <div class="step-body">
+        <h4 class="en">🔢 Count the digits FIRST!</h4>
+        <h4 class="kn">🔢 ಮೊದಲು ಅಂಕಿ ಎಣಿಸಿ!</h4>
+        <p class="en">Before you start, count how many digits are in the number you are multiplying (NOT the multiplier). This tells you which column to start from!<br><br>
+        Example: <span class="hl">319 × 8</span> → 319 has <span class="hl-red">4 digits</span> (3, 1, 9, and 8 as multiplier → count = 4)</p>
+        <p class="kn">ಶುರು ಮಾಡುವ ಮೊದಲು, ನೀವು ಗುಣಿಸುತ್ತಿರುವ ಸಂಖ್ಯೆಯಲ್ಲಿ ಎಷ್ಟು ಅಂಕಿ ಇವೆ ಎಣಿಸಿ.<br><br>
+        ಉದಾ: <span class="hl">319 × 8</span> → 319 ರಲ್ಲಿ <span class="hl-red">೪ ಅಂಕಿ</span> (3, 1, 9 ಮತ್ತು 8 = ಒಟ್ಟು ೪)</p>
+      </div>
+    </div>
+    <div class="step" style="--c:#F4A261">
+      <div class="step-num" style="background:#F4A261">2</div>
+      <div class="step-body">
+        <h4 class="en">📍 Find your starting column!</h4>
+        <h4 class="kn">📍 ಶುರುವಾಗುವ ಕಾಲಮ್ ಹುಡುಕಿ!</h4>
+        <p class="en">From the <span class="hl">middle pointer</span>, count LEFT that many places. That's where you start writing answers!<br><br>
+        If digits = 4 → go 4 places LEFT from middle → start at <span class="hl-teal">4th column</span></p>
+        <p class="kn"><span class="hl">ಮಧ್ಯದ ಸೂಚಿ</span>ಯಿಂದ ಎಡಕ್ಕೆ ಅಷ್ಟು ಕಾಲಮ್ ಹೋಗಿ. ಅಲ್ಲಿಂದ ಉತ್ತರ ಬರೆಯಲು ಶುರು!<br><br>
+        ಅಂಕಿ = ೪ → ಮಧ್ಯದಿಂದ ೪ ಎಡಕ್ಕೆ → <span class="hl-teal">೪ನೇ ಕಾಲಮ್</span>ನಿಂದ ಶುರು</p>
+      </div>
+    </div>
+    <div class="step" style="--c:#FFD93D">
+      <div class="step-num" style="background:#FFD93D; color:#333">3</div>
+      <div class="step-body">
+        <h4 class="en">✍️ Write each product with 2 digits!</h4>
+        <h4 class="kn">✍️ ಪ್ರತಿ ಉತ್ತರ ೨ ಅಂಕಿಯಲ್ಲಿ ಬರೆಯಿರಿ!</h4>
+        <p class="en">Multiply each digit and write the answer using <span class="hl">2 digits always</span>!<br>
+        If answer is 8 → write <span class="hl-red">0 8</span> (not just 8)<br>
+        If answer is 24 → write <span class="hl-green">2 4</span> (tens place then units place)</p>
+        <p class="kn">ಪ್ರತಿ ಅಂಕಿ ಗುಣಿಸಿ ಉತ್ತರವನ್ನು <span class="hl">ಯಾವಾಗಲೂ ೨ ಅಂಕಿಯಲ್ಲಿ</span> ಬರೆಯಿರಿ!<br>
+        ಉತ್ತರ 8 → <span class="hl-red">0 8</span> ಎಂದು ಬರೆಯಿರಿ<br>
+        ಉತ್ತರ 24 → <span class="hl-green">2 4</span> ಎಂದು ಬರೆಯಿರಿ</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- EXAMPLE 1: 319 × 8 -->
+  <div class="sec-title"><span class="pill" style="--c:#E63946">🔥 Example 1: 319 × 8 = 2552</span></div>
+
+  <div class="example-box" style="--bc:#E63946">
+    <div class="ex-title">🍎 <span class="en">Let's solve 319 × 8 step by step!</span><span class="kn">319 × 8 ಹಂತ ಹಂತವಾಗಿ ಬಿಡಿಸೋಣ!</span></div>
+
+    <!-- Step 0: Setup -->
+    <div class="gcard" style="margin-bottom:14px">
+      <h2 style="font-size:16px; color:var(--orange)">
+        <span class="en">📋 Setup: Count digits</span>
+        <span class="kn">📋 ಸಿದ್ಧತೆ: ಅಂಕಿ ಎಣಿಕೆ</span>
+      </h2>
+      <p class="en">319 × 8 → digits in multiplication = <span class="hl-red">4</span> (3, 1, 9, and multiplier 8)<br>
+      Go <span class="hl">4 places LEFT</span> from middle pointer → Start at <span class="hl-teal">4th column (Thousands)</span><br>
+      Each digit product goes into 2 columns at a time.</p>
+      <p class="kn">319 × 8 → ಗುಣಾಕಾರದಲ್ಲಿ ಅಂಕಿ = <span class="hl-red">೪</span> (3, 1, 9 ಮತ್ತು ಗುಣಕ 8)<br>
+      ಮಧ್ಯದಿಂದ <span class="hl">೪ ಎಡಕ್ಕೆ</span> → <span class="hl-teal">೪ನೇ ಕಾಲಮ್ (ಸಾವಿರ)</span>ದಿಂದ ಶುರು<br>
+      ಪ್ರತಿ ಅಂಕಿ ಉತ್ತರ ೨ ಕಾಲಮ್‌ಗಳಲ್ಲಿ ಹೋಗ್ತದೆ.</p>
+    </div>
+
+    <!-- Calculation rows -->
+    <div class="calc-row">
+      <div class="calc-step-num" style="background:#E63946">1</div>
+      <div class="calc-text">
+        <strong class="en">Multiply first digit: 3 × 8 = 24</strong>
+        <strong class="kn">ಮೊದಲ ಅಂಕಿ ಗುಣಿಸಿ: 3 × 8 = 24</strong><br>
+        <span class="en">Write <span class="hl-red">2</span> on 4th column, <span class="hl-red">4</span> on 3rd column</span>
+        <span class="kn">4ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ <span class="hl-red">2</span>, 3ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ <span class="hl-red">4</span> ಬರೆಯಿರಿ</span>
+      </div>
+      <div class="calc-result">24 → <span style="color:var(--red)">2</span><span style="color:var(--orange)">4</span></div>
+    </div>
+
+    <div class="calc-row">
+      <div class="calc-step-num" style="background:#F4A261">2</div>
+      <div class="calc-text">
+        <strong class="en">Multiply second digit: 1 × 8 = 8</strong>
+        <strong class="kn">ಎರಡನೇ ಅಂಕಿ ಗುಣಿಸಿ: 1 × 8 = 8</strong><br>
+        <span class="en">Write <span class="hl-teal">0</span> on 3rd column, <span class="hl-teal">8</span> on 2nd column<br>
+        <em>(0 means nothing to add on 3rd column — skip it!)</em></span>
+        <span class="kn">3ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ <span class="hl-teal">0</span>, 2ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ <span class="hl-teal">8</span> ಬರೆಯಿರಿ<br>
+        <em>(0 ಅಂದರೆ ಏನೂ ಸೇರಿಸಬೇಕಿಲ್ಲ!)</em></span>
+      </div>
+      <div class="calc-result">08 → <span style="color:var(--teal)">0</span><span style="color:var(--teal)">8</span></div>
+    </div>
+
+    <div class="calc-row">
+      <div class="calc-step-num" style="background:#FFD93D; color:#333">3</div>
+      <div class="calc-text">
+        <strong class="en">Multiply third digit: 9 × 8 = 72</strong>
+        <strong class="kn">ಮೂರನೇ ಅಂಕಿ ಗುಣಿಸಿ: 9 × 8 = 72</strong><br>
+        <span class="en">Write <span class="hl">7</span> on 2nd column, <span class="hl">2</span> on 1st column<br>
+        <em>But wait! 2nd column already has 8. So: 8 + 7 = 15!</em><br>
+        Can't add 7 directly → use <span class="hl-red">Big Brother: +3 = −3 + 10</span><br>
+        So: add 3 to 2nd column (8+3=11→carry), then add 10 to 3rd column</span>
+        <span class="kn">2ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ <span class="hl">7</span>, 1ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ <span class="hl">2</span> ಬರೆಯಿರಿ<br>
+        <em>ಆದರೆ 2ನೇ ಕಾಲಮ್‌ನಲ್ಲಿ ಈಗಾಗಲೇ 8 ಇದೆ! 8+7=15!</em><br>
+        7 ನೇರ ಸೇರಿಸಲಾಗದು → <span class="hl-red">ದೊಡ್ಡಣ್ಣ: +3 = −3 + 10</span> ಬಳಸಿ</span>
+      </div>
+      <div class="calc-result">72 → <span style="color:var(--yellow)">7</span><span style="color:var(--yellow)">2</span></div>
+    </div>
+
+    <div class="ans-box">
+      <div class="ans-label en">✅ Final Answer on Abacus = 2552</div>
+      <div class="ans-label kn">✅ ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ಅಂತಿಮ ಉತ್ತರ = 2552</div>
+      <div class="ans-num">319 × 8 = 🎉 2552</div>
+    </div>
+  </div>
+
+  <!-- VISUAL STEP BREAKDOWN -->
+  <div class="sec-title"><span class="pill" style="--c:#3A86FF">🔍 How the Abacus Looks at Each Step</span></div>
+
+  <div class="gcard">
+    <h2 class="en">📊 Column-by-Column Breakdown: 319 × 8</h2>
+    <h2 class="kn">📊 ಕಾಲಮ್ ಪ್ರಕಾರ ವಿವರಣೆ: 319 × 8</h2>
+
+    <div class="pv-table">
+      <table>
+        <thead><tr>
+          <th>Step / ಹಂತ</th><th>Action / ಕ್ರಿಯೆ</th>
+          <th>Col 4<br><small>Thou</small></th>
+          <th>Col 3<br><small>Hund</small></th>
+          <th>Col 2<br><small>Tens</small></th>
+          <th>Col 1<br><small>Units</small></th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td>Start</td>
+            <td class="en">Abacus is clear</td><td class="kn">ಖಾಲಿ</td>
+            <td>0</td><td>0</td><td>0</td><td>0</td>
+          </tr>
+          <tr>
+            <td>3×8=24</td>
+            <td class="en">Add 2 on col4, 4 on col3</td>
+            <td class="kn">col4→2, col3→4</td>
+            <td class="active">2</td><td class="active">4</td><td>0</td><td>0</td>
+          </tr>
+          <tr>
+            <td>1×8=08</td>
+            <td class="en">0 on col3 (skip), 8 on col2</td>
+            <td class="kn">col3 skip, col2→8</td>
+            <td>2</td><td>4</td><td class="active">8</td><td>0</td>
+          </tr>
+          <tr>
+            <td>9×8=72</td>
+            <td class="en">7 on col2 (+Big Bro!), 2 on col1</td>
+            <td class="kn">col2→7(ದೊಡ್ಡಣ್ಣ!), col1→2</td>
+            <td>2</td><td style="color:var(--green);font-weight:900">5</td><td style="color:var(--green);font-weight:900">5</td><td class="active">2</td>
+          </tr>
+          <tr style="background:rgba(6,214,160,0.1)">
+            <td>✅ Final</td>
+            <td class="en" style="color:var(--green);font-weight:900">Answer!</td>
+            <td class="kn" style="color:var(--green);font-weight:900">ಉತ್ತರ!</td>
+            <td style="color:var(--green);font-weight:900;font-size:18px">2</td>
+            <td style="color:var(--green);font-weight:900;font-size:18px">5</td>
+            <td style="color:var(--green);font-weight:900;font-size:18px">5</td>
+            <td style="color:var(--green);font-weight:900;font-size:18px">2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="gcard" style="border:1px solid rgba(255,165,0,0.4); background:rgba(255,165,0,0.08); margin-top:0">
+      <h2 style="font-size:16px; color:var(--orange)">💡 <span class="en">Why did 8+7 become 55 on columns 3&2?</span><span class="kn">8+7 ಕಾಲಮ್ 3&2 ರಲ್ಲಿ 55 ಆಯಿತು ಏಕೆ?</span></h2>
+      <p class="en">
+        After step 2: col3=4, col2=8<br>
+        Now we need to add 7 to col2 (8+7=15).<br>
+        15 = 1 carry to col3, 5 remains in col2<br>
+        So col3 becomes 4+1 = <span class="hl-red">5</span>, col2 becomes <span class="hl-red">5</span><br>
+        Then add 2 to col1: col1 = <span class="hl-green">2</span><br>
+        Final: 2 · 5 · 5 · 2 = <span class="hl">2552 ✅</span>
+      </p>
+      <p class="kn">
+        ಹಂತ 2 ನಂತರ: col3=4, col2=8<br>
+        ಈಗ col2 ಗೆ 7 ಸೇರಿಸಬೇಕು (8+7=15).<br>
+        15 = 1 ಮೇಲಿನ col3 ಗೆ, 5 col2 ನಲ್ಲಿ ಉಳಿಯುತ್ತದೆ<br>
+        col3 → 4+1 = <span class="hl-red">5</span>, col2 → <span class="hl-red">5</span><br>
+        col1 ಗೆ 2 ಸೇರಿಸಿ: col1 = <span class="hl-green">2</span><br>
+        ಅಂತಿಮ: 2 · 5 · 5 · 2 = <span class="hl">2552 ✅</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- EXAMPLE 2: Simple 2-digit -->
+  <div class="sec-title"><span class="pill" style="--c:#06D6A0">🌟 Example 2: 23 × 4 = 92 (Simple Practice!)</span></div>
+
+  <div class="example-box" style="--bc:#06D6A0; background:rgba(6,214,160,0.08)">
+    <div class="ex-title">🍊 <span class="en">23 × 4 — Great for beginners!</span><span class="kn">23 × 4 — ಮೊದಲ ಅಭ್ಯಾಸಕ್ಕೆ ತುಂಬಾ ಒಳ್ಳೆಯದು!</span></div>
+
+    <div class="gcard" style="margin-bottom:14px">
+      <p class="en">Digits in 23 × 4 = <span class="hl-red">3</span> (2, 3, and multiplier 4)<br>
+      Go <span class="hl">3 places LEFT</span> from middle → Start at <span class="hl-teal">3rd column (Hundreds)</span></p>
+      <p class="kn">23 × 4 ರಲ್ಲಿ ಅಂಕಿ = <span class="hl-red">೩</span> (2, 3 ಮತ್ತು ಗುಣಕ 4)<br>
+      <span class="hl">೩ ಎಡಕ್ಕೆ</span> → <span class="hl-teal">3ನೇ ಕಾಲಮ್ (ನೂರು)</span>ದಿಂದ ಶುರು</p>
+    </div>
+
+    <div class="calc-row">
+      <div class="calc-step-num" style="background:#06D6A0">1</div>
+      <div class="calc-text">
+        <strong class="en">2 × 4 = 08</strong><strong class="kn">2 × 4 = 08</strong><br>
+        <span class="en">Add <span class="hl-teal">0</span> on col3, <span class="hl-teal">8</span> on col2</span>
+        <span class="kn">col3 ಗೆ <span class="hl-teal">0</span>, col2 ಗೆ <span class="hl-teal">8</span></span>
+      </div>
+      <div class="calc-result">08</div>
+    </div>
+
+    <div class="calc-row">
+      <div class="calc-step-num" style="background:#2EC4B6">2</div>
+      <div class="calc-text">
+        <strong class="en">3 × 4 = 12</strong><strong class="kn">3 × 4 = 12</strong><br>
+        <span class="en">Add <span class="hl">1</span> on col2, <span class="hl">2</span> on col1<br>
+        col2 had 8: 8+1 = <span class="hl-green">9</span></span>
+        <span class="kn">col2 ಗೆ <span class="hl">1</span>, col1 ಗೆ <span class="hl">2</span><br>
+        col2 ನಲ್ಲಿ 8 ಇತ್ತು: 8+1 = <span class="hl-green">9</span></span>
+      </div>
+      <div class="calc-result">12</div>
+    </div>
+
+    <div class="ans-box">
+      <div class="ans-label en">✅ Final Answer = 92</div>
+      <div class="ans-label kn">✅ ಅಂತಿಮ ಉತ್ತರ = 92</div>
+      <div class="ans-num">23 × 4 = 🎉 92</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- KEY RULES SUMMARY -->
+  <div class="sec-title"><span class="pill" style="--c:#8338EC">⚡ Super Quick Summary!</span></div>
+  <div class="mgrid">
+    <div class="mcard">
+      <div class="me">1️⃣</div>
+      <h4 class="en">Count Digits First</h4>
+      <h4 class="kn">ಮೊದಲು ಅಂಕಿ ಎಣಿಸಿ</h4>
+      <p class="en">Count ALL digits including multiplier. That number = how far LEFT to go!</p>
+      <p class="kn">ಗುಣಕ ಸೇರಿ ಎಲ್ಲ ಅಂಕಿ ಎಣಿಸಿ. ಆ ಸಂಖ್ಯೆ = ಎಷ್ಟು ಎಡಕ್ಕೆ ಹೋಗಬೇಕು!</p>
+    </div>
+    <div class="mcard">
+      <div class="me">✌️</div>
+      <h4 class="en">Always Write 2 Digits</h4>
+      <h4 class="kn">ಯಾವಾಗಲೂ ೨ ಅಂಕಿ ಬರೆಯಿರಿ</h4>
+      <p class="en">8 → write 0 8. 24 → write 2 4. Never skip the zero!</p>
+      <p class="kn">8 → 0 8 ಬರೆಯಿರಿ. 24 → 2 4 ಬರೆಯಿರಿ. ಶೂನ್ಯ ಬಿಡಬೇಡಿ!</p>
+    </div>
+    <div class="mcard">
+      <div class="me">👫</div>
+      <h4 class="en">Use Big Brother!</h4>
+      <h4 class="kn">ದೊಡ್ಡಣ್ಣ ಬಳಸಿ!</h4>
+      <p class="en">If adding gets too full — use Big Brother formula to carry over!</p>
+      <p class="kn">ಸೇರಿಸಲು ಜಾಗ ಇಲ್ಲದಿದ್ದರೆ — ದೊಡ್ಡಣ್ಣ ಸೂತ್ರ ಬಳಸಿ!</p>
+    </div>
+    <div class="mcard">
+      <div class="me">⬅️</div>
+      <h4 class="en">Always Go Left</h4>
+      <h4 class="kn">ಯಾವಾಗಲೂ ಎಡಕ್ಕೆ</h4>
+      <p class="en">Answers are written LEFT to RIGHT, one pair of digits per column pair!</p>
+      <p class="kn">ಉತ್ತರ ಎಡದಿಂದ ಬಲಕ್ಕೆ, ಒಂದು ಜೋಡಿ ಅಂಕಿ ಒಂದು ಜೋಡಿ ಕಾಲಮ್!</p>
+    </div>
+    <div class="mcard">
+      <div class="me">🔢</div>
+      <h4 class="en">Each Digit Gets 2 Columns</h4>
+      <h4 class="kn">ಪ್ರತಿ ಅಂಕಿಗೆ ೨ ಕಾಲಮ್</h4>
+      <p class="en">Tens digit of product → left column. Units digit → right column.</p>
+      <p class="kn">ಉತ್ತರದ ಹತ್ತರ ಅಂಕಿ → ಎಡ ಕಾಲಮ್. ಒಂದರ ಅಂಕಿ → ಬಲ ಕಾಲಮ್.</p>
+    </div>
+    <div class="mcard">
+      <div class="me">🎯</div>
+      <h4 class="en">Add to Existing Beads</h4>
+      <h4 class="kn">ಇರುವ ಮಣಿಗೆ ಸೇರಿಸಿ</h4>
+      <p class="en">New digits are ADDED to whatever beads are already on that column!</p>
+      <p class="kn">ಹೊಸ ಅಂಕಿಗಳನ್ನು ಆ ಕಾಲಮ್‌ನಲ್ಲಿ ಈಗಾಗಲೇ ಇರುವ ಮಣಿಗೆ ಸೇರಿಸಿ!</p>
+    </div>
+  </div>
+
+  <!-- PRACTICE PROBLEMS -->
+  <div class="sec-title"><span class="pill" style="--c:#F4A261">✏️ Try These Yourself!</span></div>
+  <div class="gcard">
+    <h2 class="en">🏋️ Practice Problems</h2>
+    <h2 class="kn">🏋️ ಅಭ್ಯಾಸ ಪ್ರಶ್ನೆಗಳು</h2>
+    <div class="mgrid" style="margin-top:14px">
+      <div class="mcard" style="border:1px solid rgba(230,57,70,0.4)">
+        <div class="me">⭐</div>
+        <h4 class="en">Easy — Try This!</h4><h4 class="kn">ಸುಲಭ — ಪ್ರಯತ್ನಿಸಿ!</h4>
+        <p style="color:var(--gold); font-size:18px; font-weight:900; margin:8px 0">12 × 3</p>
+        <p class="en">Hint: 3 digits → 3 left</p><p class="kn">힣ಸ: ೩ ಅಂಕಿ → ೩ ಎಡಕ್ಕೆ</p>
+        <p style="color:var(--green); font-size:14px; margin-top:8px">Answer: 36</p>
+      </div>
+      <div class="mcard" style="border:1px solid rgba(244,162,97,0.4)">
+        <div class="me">⭐⭐</div>
+        <h4 class="en">Medium — Try This!</h4><h4 class="kn">ಮಧ್ಯಮ — ಪ್ರಯತ್ನಿಸಿ!</h4>
+        <p style="color:var(--gold); font-size:18px; font-weight:900; margin:8px 0">45 × 6</p>
+        <p class="en">Hint: 3 digits → 3 left</p><p class="kn">힣ಸ: ೩ ಅಂಕಿ → ೩ ಎಡಕ್ಕೆ</p>
+        <p style="color:var(--green); font-size:14px; margin-top:8px">Answer: 270</p>
+      </div>
+      <div class="mcard" style="border:1px solid rgba(255,215,0,0.4)">
+        <div class="me">⭐⭐⭐</div>
+        <h4 class="en">Hard — Challenge!</h4><h4 class="kn">ಕಷ್ಟ — ಚಾಲೆಂಜ್!</h4>
+        <p style="color:var(--gold); font-size:18px; font-weight:900; margin:8px 0">247 × 5</p>
+        <p class="en">Hint: 4 digits → 4 left</p><p class="kn">힣ಸ: ೪ ಅಂಕಿ → ೪ ಎಡಕ್ಕೆ</p>
+        <p style="color:var(--green); font-size:14px; margin-top:8px">Answer: 1235</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="sec-title"><span class="pill" style="--c:#FFD93D">💡 Tips to Remember!</span></div>
+  <div class="tgrid">
+    <div class="tipcard"><div class="ti">🎵</div><h4 class="en" style="--c:var(--gold)">Sing the Tables!</h4><h4 class="kn" style="--c:var(--gold)">ಟೇಬಲ್ ಹಾಡಿ!</h4><p class="en">Knowing 1–9 times tables perfectly makes abacus multiplication super fast!</p><p class="kn">1–9 ಟೇಬಲ್ ಕಂಠಪಾಠ ಮಾಡಿದರೆ ಗುಣಾಕಾರ ಬಹಳ ವೇಗ!</p></div>
+    <div class="tipcard"><div class="ti">✌️</div><h4 class="en" style="--c:var(--gold)">Two Columns Per Digit</h4><h4 class="kn" style="--c:var(--gold)">ಒಂದು ಅಂಕಿ = ೨ ಕಾಲಮ್</h4><p class="en">Each multiplication product takes 2 columns. Never forget the zero!</p><p class="kn">ಪ್ರತಿ ಗುಣಾಕಾರ ಉತ್ತರ ೨ ಕಾಲಮ್ ತೆಗೆದುಕೊಳ್ಳ್ತದೆ. ಶೂನ್ಯ ಮರೆಯಬೇಡಿ!</p></div>
+    <div class="tipcard"><div class="ti">📍</div><h4 class="en" style="--c:var(--gold)">Count Left from Middle</h4><h4 class="kn" style="--c:var(--gold)">ಮಧ್ಯದಿಂದ ಎಡಕ್ಕೆ</h4><p class="en">Always find your starting column by counting left from the middle pointer!</p><p class="kn">ಮಧ್ಯದ ಸೂಚಿಯಿಂದ ಎಡಕ್ಕೆ ಎಣಿಸಿ ಯಾವ ಕಾಲಮ್‌ನಲ್ಲಿ ಶುರು ಮಾಡಬೇಕು ಹುಡುಕಿ!</p></div>
+    <div class="tipcard"><div class="ti">➕</div><h4 class="en" style="--c:var(--gold)">Add, Don't Replace!</h4><h4 class="kn" style="--c:var(--gold)">ಸೇರಿಸಿ, ಬದಲಿಸಬೇಡಿ!</h4><p class="en">New digits are always ADDED to existing beads. Never remove old beads!</p><p class="kn">ಹೊಸ ಅಂಕಿಗಳನ್ನು ಇರುವ ಮಣಿಗೆ ಸೇರಿಸಿ. ಹಳೆ ಮಣಿ ತೆಗೆಯಬೇಡಿ!</p></div>
+    <div class="tipcard"><div class="ti">👫</div><h4 class="en" style="--c:var(--gold)">Big Brother Helps!</h4><h4 class="kn" style="--c:var(--gold)">ದೊಡ್ಡಣ್ಣ ಸಹಾಯ!</h4><p class="en">When column is full during adding, use Big Brother to carry to next column!</p><p class="kn">ಕಾಲಮ್ ತುಂಬಿದರೆ ದೊಡ್ಡಣ್ಣ ಸೂತ್ರ ಬಳಸಿ ಮುಂದಿನ ಕಾಲಮ್‌ಗೆ ಸಾಗಿಸಿ!</p></div>
+    <div class="tipcard"><div class="ti">🔄</div><h4 class="en" style="--c:var(--gold)">Practice Daily!</h4><h4 class="kn" style="--c:var(--gold)">ಪ್ರತಿದಿನ ಅಭ್ಯಾಸ!</h4><p class="en">Do 5 multiplication problems every day — you'll become lightning fast! ⚡</p><p class="kn">ಪ್ರತಿದಿನ ೫ ಗುಣಾಕಾರ ಅಭ್ಯಾಸ ಮಾಡಿ — ಮಿಂಚಿನ ವೇಗ ಸಿಗ್ತದೆ! ⚡</p></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="en">🏆 Multiplication Master Unlocked! 🏆</span>
+    <span class="kn">🏆 ಗುಣಾಕಾರ ಮಾಸ್ಟರ್ ಆದೆ! 🏆</span>
+    <p class="en">Count digits → Go Left → Multiply each → Write 2 digits → Add Big Brother when needed! 🚀</p>
+    <p class="kn">ಅಂಕಿ ಎಣಿಸು → ಎಡಕ್ಕೆ ಹೋಗು → ಗುಣಿಸು → ೨ ಅಂಕಿ ಬರೆ → ಬೇಕಿದ್ದರೆ ದೊಡ್ಡಣ್ಣ! 🚀</p>
+  </div>
+
+</div>
+
+<script>
+function setLang(lang) {
+  const main = document.getElementById('main');
+  main.className = main.className.replace(/show-\w+/g,'').trim();
+  main.classList.add('show-' + lang);
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.getElementById('btn-kn').classList.toggle('active', lang==='kn');
+}
+</script>
+</body>
+</html>
