@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abacus Division – Rod Fixing Formula</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Kannada:wght@400;700;900&family=Noto+Sans+Kannada:wght@400;600;700;800&family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0818;--s1:#120f28;--s2:#1c1840;
+  --gold:#FFD700;--gold2:#E8A020;--gold3:#FFF5A0;
+  --amber:#F0A030;--teal:#2EC4B6;--blue:#3A86FF;
+  --green:#06D6A0;--red:#E63946;--orange:#F4A261;
+  --yellow:#FFD93D;--purple:#8338EC;--pink:#FF6B9D;
+  --wood1:#6a4e28;--wood2:#3a2810;--wood3:#2a1c08;
+  --rail1:#9a7a42;--rail2:#5a4220;
+  --bon1:#FFD060;--bon2:#E09030;
+  --boff1:#c07818;--boff2:#8a5010;
+  --bhi1:#60e8ff;--bhi2:#20a8c0;
+  --text:#e8e4d8;--text2:#a09880;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:radial-gradient(ellipse at top,#180f30,#0a0818 70%);font-family:'Noto Sans Kannada','Nunito',sans-serif;color:var(--text);min-height:100vh;}
+.page{max-width:940px;margin:0 auto;padding:20px 14px 60px;}
+
+/* LANG */
+.lang-bar{display:flex;justify-content:center;gap:10px;margin-bottom:18px;}
+.lb{padding:9px 26px;border-radius:50px;border:2px solid var(--gold);background:transparent;color:var(--gold);font-family:'Noto Sans Kannada','Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;}
+.lb.active{background:var(--gold);color:#1a1000;box-shadow:0 0 18px rgba(255,215,0,.4);}
+.en,.kn{display:none;}
+.show-en .en,.show-kn .kn{display:block;}
+span.en,span.kn,b.en,b.kn{display:inline;}
+.show-en span.kn,.show-kn span.en,.show-en b.kn,.show-kn b.en{display:none;}
+
+/* HEADER */
+.hdr{text-align:center;background:linear-gradient(135deg,var(--wood1),var(--wood2));border-radius:22px;padding:24px 20px;margin-bottom:20px;border:2px solid #8a6a38;box-shadow:0 12px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);}
+.hdr h1{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:clamp(22px,4.5vw,40px);color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.4);}
+.hdr p{font-size:13px;color:var(--text2);margin-top:6px;font-weight:600;}
+
+/* TABS */
+.tabs{display:flex;gap:3px;background:rgba(255,255,255,.04);border-radius:14px;padding:5px;margin-bottom:20px;flex-wrap:wrap;}
+.tab-btn{flex:1;min-width:76px;padding:9px 5px;border:none;background:transparent;color:var(--text2);font-family:'Noto Sans Kannada','Nunito',sans-serif;font-size:11px;cursor:pointer;border-radius:10px;transition:all .2s;font-weight:700;}
+.tab-btn.active{background:rgba(255,215,0,.13);color:var(--gold);border:1px solid rgba(255,215,0,.3);}
+.tab-panel{display:none;} .tab-panel.active{display:block;}
+
+/* ═══ ABACUS ═══ */
+.abacus-wrap{width:100%;margin-bottom:16px;}
+.abacus-outer{background:linear-gradient(160deg,var(--wood1),var(--wood2),var(--wood3));border-radius:18px;padding:15px;box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 0 2px #8a6a38,inset 0 2px 0 rgba(255,255,255,.07);}
+.abacus-inner{background:linear-gradient(170deg,#2e2010,#1e1408);border-radius:12px;border:1px solid #4a3418;box-shadow:inset 0 4px 20px rgba(0,0,0,.55);overflow:hidden;}
+.a-rail{height:12px;background:linear-gradient(180deg,var(--rail1),var(--rail2),#3a2c10);box-shadow:0 3px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);}
+.col-names{display:flex;padding:5px 5px 1px;}
+.cn{flex:1;text-align:center;font-size:clamp(7px,1.1vw,10px);color:var(--gold);font-weight:900;font-family:'Fredoka One',serif;}
+.cn small{display:block;font-size:7px;color:var(--text2);}
+
+/* Body: upper=88px bar=13px lower=144px pad=11px×2 = 267px */
+.a-body{position:relative;height:267px;padding:11px 5px;}
+.a-bar{position:absolute;left:0;right:0;top:99px;height:13px;background:linear-gradient(180deg,var(--rail1),var(--rail2));box-shadow:0 3px 10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.18);z-index:20;pointer-events:none;border-radius:2px;}
+.a-cols{position:absolute;top:11px;bottom:11px;left:5px;right:5px;display:flex;}
+.acol{flex:1;position:relative;}
+.acol::before{content:'';position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:5px;background:linear-gradient(90deg,#1a1408,#3a2e18,#1a1408);border-radius:3px;z-index:1;box-shadow:0 0 6px rgba(0,0,0,.6);}
+/* Pointer marker */
+.acol.is-pointer::after{content:'▲';position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--gold);z-index:10;}
+
+.bead{position:absolute;left:50%;transform:translateX(-50%);width:84%;max-width:66px;height:24px;border-radius:12px;cursor:pointer;z-index:5;transition:top .17s cubic-bezier(.34,1.4,.64,1),box-shadow .17s,filter .17s;user-select:none;}
+.bead:hover{filter:brightness(1.35);}
+.bead.upper{background:linear-gradient(160deg,var(--bon1),var(--bon2));box-shadow:0 4px 12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.3);}
+.bead.upper.off{background:linear-gradient(160deg,var(--boff1),var(--boff2));opacity:.65;}
+.bead.lower{background:linear-gradient(160deg,var(--bon1),var(--bon2));box-shadow:0 4px 12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.28);}
+.bead.lower.off{background:linear-gradient(160deg,var(--boff1),var(--boff2));opacity:.65;}
+.bead.hi{background:linear-gradient(160deg,var(--bhi1),var(--bhi2))!important;box-shadow:0 0 18px rgba(96,232,255,.7),0 4px 12px rgba(0,0,0,.5)!important;opacity:1!important;}
+.bead.hi-red{background:linear-gradient(160deg,#ff8080,#e02020)!important;box-shadow:0 0 18px rgba(255,80,80,.7)!important;opacity:1!important;}
+
+.col-vals-bar{display:flex;padding:3px 5px 0;}
+.cv{flex:1;text-align:center;font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:clamp(12px,1.8vw,17px);transition:color .2s;}
+.cv.nz{color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.5);}
+.cv.zr{color:var(--text2);}
+
+/* pointer labels */
+.ptr-labels{display:flex;padding:2px 5px 0;}
+.pl{flex:1;text-align:center;font-size:8px;color:var(--text2);}
+.pl.is-ptr{color:var(--gold);font-weight:900;font-size:9px;}
+
+/* TOTAL */
+.total-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 16px;flex-wrap:wrap;}
+.total-box{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);border-radius:14px;padding:10px 22px;text-align:center;}
+.tlbl{font-size:10px;color:var(--text2);letter-spacing:2px;margin-bottom:3px;}
+.tnum{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:34px;font-weight:900;color:var(--gold);text-shadow:0 0 18px rgba(255,215,0,.4);}
+
+/* BTNS */
+.ctrl-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.btn{padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--text2);font-family:'Noto Sans Kannada','Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,.1);}
+.btn.primary{background:rgba(255,215,0,.13);border-color:var(--gold);color:var(--gold);}
+.btn.green{background:rgba(6,214,160,.13);border-color:var(--green);color:var(--green);}
+.btn.red{background:rgba(230,57,70,.13);border-color:var(--red);color:var(--red);}
+.ni{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:var(--text);font-family:'Fredoka One',serif;font-size:14px;padding:8px 12px;border-radius:10px;width:100px;text-align:center;outline:none;transition:border-color .15s;}
+.ni:focus{border-color:var(--gold);}
+
+/* GLASS CARD */
+.gc{background:rgba(255,255,255,.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:22px 18px;margin-bottom:18px;box-shadow:0 8px 30px rgba(0,0,0,.3);}
+.gc h2{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:clamp(16px,3vw,24px);color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.gc p,.gc li{font-size:clamp(12px,2vw,14px);line-height:2;color:var(--text);font-weight:600;}
+.gc ul{padding-left:20px;}
+.gc li{margin-bottom:5px;}
+.hl{background:var(--gold);color:#1a1000;border-radius:6px;padding:1px 8px;font-weight:800;display:inline-block;}
+.hl-r{background:var(--red);color:white;border-radius:6px;padding:1px 8px;font-weight:800;display:inline-block;}
+.hl-g{background:var(--green);color:white;border-radius:6px;padding:1px 8px;font-weight:800;display:inline-block;}
+.hl-b{background:var(--blue);color:white;border-radius:6px;padding:1px 8px;font-weight:800;display:inline-block;}
+.hl-t{background:var(--teal);color:white;border-radius:6px;padding:1px 8px;font-weight:800;display:inline-block;}
+
+/* FORMULA BOX */
+.formula-box{background:rgba(255,215,0,.07);border:2px solid rgba(255,215,0,.3);border-radius:16px;padding:16px 18px;margin:12px 0;text-align:center;}
+.formula-big{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:clamp(18px,3.5vw,28px);color:var(--gold);letter-spacing:2px;}
+.formula-sub{font-size:12px;color:var(--text2);margin-top:6px;font-weight:600;}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+.step{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 12px;transition:transform .15s;}
+.step:hover{transform:translateX(3px);}
+.snum{width:34px;height:34px;border-radius:50%;background:var(--sc,var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',serif;font-size:16px;color:#1a1000;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,.3);}
+.sbody h4{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:15px;color:var(--gold);margin-bottom:5px;}
+.sbody p{font-size:12px;line-height:1.9;color:var(--text);font-weight:600;}
+
+/* EXAMPLE BOX */
+.ebox{border-radius:20px;padding:20px 16px;margin-bottom:18px;border:2px solid var(--bc,var(--red));background:rgba(230,57,70,.07);}
+.etitle{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:clamp(17px,3.5vw,24px);color:var(--bc,var(--red));margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.crow{display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,.05);border-radius:11px;padding:11px 12px;margin-bottom:7px;}
+.cnum{width:26px;height:26px;border-radius:50%;background:var(--bc,var(--red));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:white;flex-shrink:0;}
+.ctext{font-size:12px;font-weight:700;line-height:1.8;flex:1;color:var(--text);}
+.cres{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:14px;font-weight:900;color:var(--green);white-space:nowrap;}
+
+/* TABLE */
+.ptable{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.ptable table{width:100%;border-collapse:collapse;}
+.ptable th{background:rgba(255,215,0,.12);padding:9px 12px;text-align:center;font-size:11px;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.08);font-family:'Fredoka One','Noto Serif Kannada',serif;}
+.ptable td{padding:9px 12px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05);text-align:center;font-weight:700;}
+.ptable tr:last-child td{border-bottom:none;}
+.ptable tr:hover td{background:rgba(255,255,255,.04);}
+.ptable td.act{color:var(--green);font-size:14px;font-weight:900;}
+
+/* ANS BOX */
+.abox{background:linear-gradient(135deg,rgba(6,214,160,.15),rgba(58,134,255,.15));border:2px solid var(--green);border-radius:14px;padding:14px 16px;text-align:center;margin:12px 0;}
+.albl{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700;}
+.anum{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:28px;color:var(--green);text-shadow:0 0 18px rgba(6,214,160,.5);}
+
+/* PRACTICE */
+.pa{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.pcard{background:rgba(255,255,255,.05);border:2px solid rgba(255,215,0,.2);border-radius:20px;padding:24px 28px;text-align:center;width:100%;max-width:500px;}
+.plbl{font-size:10px;color:var(--text2);margin-bottom:8px;letter-spacing:2px;}
+.peq{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:clamp(28px,5.5vw,50px);color:var(--text);letter-spacing:-2px;}
+.peq .op{color:var(--text2);}
+.hintbox{background:rgba(58,134,255,.1);border:1px solid rgba(58,134,255,.3);border-radius:12px;padding:12px 14px;margin:10px 0;text-align:left;font-size:12px;color:var(--text);line-height:1.9;font-weight:600;}
+.hintbox b{color:var(--yellow);}
+.ar{display:flex;gap:8px;align-items:center;margin-top:12px;justify-content:center;}
+.ai{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);color:var(--text);font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:26px;font-weight:900;padding:9px 14px;border-radius:11px;width:110px;text-align:center;outline:none;transition:border-color .15s;}
+.ai:focus{border-color:var(--gold);}
+.chkbtn{padding:11px 18px;background:rgba(255,215,0,.13);border:2px solid var(--gold);color:var(--gold);font-family:'Noto Sans Kannada','Nunito',sans-serif;font-size:13px;font-weight:800;border-radius:10px;cursor:pointer;transition:all .15s;}
+.chkbtn:hover{background:var(--gold);color:#1a1000;}
+.fb{font-size:14px;min-height:22px;margin-top:8px;font-weight:700;}
+.fb.ok{color:var(--green);} .fb.no{color:var(--red);}
+.sc-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.scb{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px 20px;text-align:center;}
+.sn{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:26px;color:var(--gold);}
+.sl{font-size:10px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
+.diff-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.dbtn{padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.13);background:transparent;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Noto Sans Kannada','Nunito',sans-serif;}
+.dbtn.active{background:rgba(255,215,0,.13);border-color:var(--gold);color:var(--gold);}
+
+/* STEP-BY-STEP */
+.sbsp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:15px;padding:14px;width:100%;max-width:600px;}
+.sbsp h3{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:15px;color:var(--gold);margin-bottom:10px;text-align:center;}
+.slist{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;}
+.si{display:flex;align-items:flex-start;gap:9px;background:rgba(255,255,255,.03);border-radius:9px;padding:9px 10px;border:1px solid transparent;transition:border-color .2s;}
+.si.cur{border-color:var(--gold);background:rgba(255,215,0,.07);}
+.si.done{border-color:rgba(6,214,160,.3);background:rgba(6,214,160,.04);}
+.sin{width:24px;height:24px;border-radius:50%;background:var(--sc,var(--gold));color:#1a1000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;}
+.stxt{font-size:11px;font-weight:700;color:var(--text);line-height:1.7;}
+
+/* DIVIDER */
+.div{height:3px;border-radius:2px;margin:28px 0;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow));}
+
+/* MINI GRID */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:16px;}
+.mc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:14px 12px;text-align:center;transition:transform .17s;}
+.mc:hover{transform:translateY(-3px);}
+.mc .me{font-size:26px;margin-bottom:7px;}
+.mc h4{font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:14px;color:var(--gold);margin-bottom:5px;}
+.mc p{font-size:11px;color:var(--text2);font-weight:600;line-height:1.6;}
+
+/* FOOTER */
+.ftr{text-align:center;background:linear-gradient(135deg,var(--wood1),var(--wood2));border-radius:18px;padding:18px;color:var(--gold);font-family:'Fredoka One','Noto Serif Kannada',serif;font-size:17px;margin-top:18px;border:1px solid #6a5030;}
+.ftr p{font-size:11px;font-family:'Noto Sans Kannada','Nunito',sans-serif;font-weight:700;margin-top:5px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="page show-en" id="main">
+
+<div class="lang-bar">
+  <button class="lb active" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+  <button class="lb" id="btn-kn" onclick="setLang('kn')">🇮🇳 ಕನ್ನಡ</button>
+</div>
+
+<div class="hdr">
+  <h1>➗ <span class="en">Abacus Division</span><span class="kn">ಅಬ್ಯಾಕಸ್ ಭಾಗಾಕಾರ</span></h1>
+  <p class="en">Runners Level IV · Sprinters Level III · Rod Fixing Formula</p>
+  <p class="kn">ರನ್ನರ್ಸ್ ಲೆವೆಲ್ IV · ಸ್ಪ್ರಿಂಟರ್ಸ್ ಲೆವೆಲ್ III · ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಸೂತ್ರ</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('learn',this)">📖 <span class="en">Learn</span><span class="kn">ಕಲಿ</span></button>
+  <button class="tab-btn" onclick="switchTab('abacus',this)">🧮 <span class="en">Abacus</span><span class="kn">ಅಬ್ಯಾಕಸ್</span></button>
+  <button class="tab-btn" onclick="switchTab('practice',this)">✏️ <span class="en">Practice</span><span class="kn">ಅಭ್ಯಾಸ</span></button>
+  <button class="tab-btn" onclick="switchTab('stepbystep',this)">👣 <span class="en">Step Guide</span><span class="kn">ಹಂತ ಗೈಡ್</span></button>
+</div>
+
+<!-- ═══════════ LEARN TAB ═══════════ -->
+<div id="tab-learn" class="tab-panel active">
+
+  <!-- ROD FIXING FORMULA -->
+  <div class="gc">
+    <h2>🔧 <span class="en">What is Rod Fixing Formula?</span><span class="kn">ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಸೂತ್ರ ಎಂದರೇನು?</span></h2>
+    <p class="en">Rod fixing formula tells us <strong>which column (rod) to start writing the quotient (answer)</strong> on the abacus during division.<br><br>
+    It works like this:</p>
+    <p class="kn">ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಸೂತ್ರ ಹೇಳ್ತದೆ — ಭಾಗಾಕಾರದಲ್ಲಿ <strong>ಯಾವ ಕಾಲಮ್ (ರಾಡ್)ನಲ್ಲಿ ಉತ್ತರ (ಭಾಗಲಬ್ಧ) ಬರೆಯಬೇಕು</strong> ಎಂದು.<br><br>
+    ಹೀಗೆ ಕೆಲಸ ಮಾಡ್ತದೆ:</p>
+
+    <div class="formula-box">
+      <div class="formula-big">Starting Column = Digits in Dividend − Digits in Divisor + 1</div>
+      <div class="formula-sub en">Count from the RIGHT SIDE of middle pointer</div>
+      <div class="formula-sub kn">ಮಧ್ಯ ಸೂಚಿಯ ಬಲ ಭಾಗದಿಂದ ಎಣಿಸಿ</div>
+    </div>
+
+    <p class="en">Then the <strong>answer digit</strong> comes in that column based on 3 simple rules:</p>
+    <p class="kn">ನಂತರ 3 ಸರಳ ನಿಯಮಗಳ ಆಧಾರದ ಮೇಲೆ <strong>ಉತ್ತರ ಅಂಕಿ</strong> ಬರ್ತದೆ:</p>
+    <ul style="margin-top:10px">
+      <li class="en"><span class="hl-r">Answer = 0</span> → Add dividend number on <strong>right side of middle pointer (Units place)</strong></li>
+      <li class="kn"><span class="hl-r">ಉತ್ತರ = 0</span> → ಮಧ್ಯ ಸೂಚಿಯ <strong>ಬಲ ಭಾಗ (ಒಂದರ ಸ್ಥಾನ)</strong>ದಲ್ಲಿ ಭಾಜ್ಯ ಸಂಖ್ಯೆ ಸೇರಿಸಿ</li>
+      <li class="en"><span class="hl-g">Answer = 1</span> → Add dividend number on <strong>middle pointer (House pointer)</strong></li>
+      <li class="kn"><span class="hl-g">ಉತ್ತರ = 1</span> → <strong>ಮಧ್ಯ ಸೂಚಿ (ಹೌಸ್ ಪಾಯಿಂಟರ್)</strong>ನಲ್ಲಿ ಭಾಜ್ಯ ಸಂಖ್ಯೆ ಸೇರಿಸಿ</li>
+      <li class="en"><span class="hl-b">Answer = 2</span> → Add dividend number on <strong>left side of middle pointer (Ten's place)</strong></li>
+      <li class="kn"><span class="hl-b">ಉತ್ತರ = 2</span> → ಮಧ್ಯ ಸೂಚಿಯ <strong>ಎಡ ಭಾಗ (ಹತ್ತರ ಸ್ಥಾನ)</strong>ದಲ್ಲಿ ಭಾಜ್ಯ ಸಂಖ್ಯೆ ಸೇರಿಸಿ</li>
+    </ul>
+    <div style="margin-top:12px;padding:12px;background:rgba(255,215,0,.08);border-radius:12px;border-left:4px solid var(--gold)">
+      <p class="en"><strong>🌟 Key Rule:</strong> After applying rod fixing formula, always add the <strong>DIVISOR</strong> on the <strong>last pointer (right side)</strong>. This is compulsory!</p>
+      <p class="kn"><strong>🌟 ಮುಖ್ಯ ನಿಯಮ:</strong> ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಸೂತ್ರ ಅನ್ವಯಿಸಿದ ನಂತರ, <strong>ಕೊನೆಯ ಸೂಚಿ (ಬಲ ಭಾಗ)</strong>ದಲ್ಲಿ ಯಾವಾಗಲೂ <strong>ಭಾಜಕ</strong> ಸೇರಿಸಿ. ಇದು ಕಡ್ಡಾಯ!</p>
+    </div>
+  </div>
+
+  <!-- SKIP ROD RULES -->
+  <div class="gc">
+    <h2>⬛ <span class="en">When to Skip a Rod?</span><span class="kn">ರಾಡ್ ಸ್ಕಿಪ್ ಮಾಡುವಾಗ?</span></h2>
+    <div class="steps">
+      <div class="step"><div class="snum" style="background:var(--red)">1</div>
+        <div class="sbody">
+          <h4 class="en">Divisor LARGER than dividend digit → Skip rod!</h4>
+          <h4 class="kn">ಭಾಜಕ, ಭಾಜ್ಯ ಅಂಕಿಗಿಂತ ದೊಡ್ಡದಾದರೆ → ರಾಡ್ ಸ್ಕಿಪ್!</h4>
+          <p class="en">If divisor > dividend's digit at current place → you must skip one rod and combine with next digit</p>
+          <p class="kn">ಭಾಜಕ > ಈ ಸ್ಥಾನದ ಭಾಜ್ಯ ಅಂಕಿ → ಒಂದು ರಾಡ್ ಸ್ಕಿಪ್ ಮಾಡಿ ಮುಂದಿನ ಅಂಕಿ ಜೊತೆ ಸೇರಿಸಿ</p>
+        </div>
+      </div>
+      <div class="step"><div class="snum" style="background:var(--orange)">2</div>
+        <div class="sbody">
+          <h4 class="en">Dividend digit SMALLER than divisor → No skip needed</h4>
+          <h4 class="kn">ಭಾಜ್ಯ ಅಂಕಿ ಭಾಜಕಕ್ಕಿಂತ ಚಿಕ್ಕದಾದರೆ → ಸ್ಕಿಪ್ ಬೇಡ</h4>
+          <p class="en">If dividend at ten's place is SMALLER → no skip. Start solving directly from that column.</p>
+          <p class="kn">ಹತ್ತರ ಸ್ಥಾನದ ಭಾಜ್ಯ ಚಿಕ್ಕದಾದರೆ → ಸ್ಕಿಪ್ ಬೇಡ. ನೇರವಾಗಿ ಆ ಕಾಲಮ್‌ನಿಂದ ಶುರು ಮಾಡಿ.</p>
+        </div>
+      </div>
+      <div class="step"><div class="snum" style="background:var(--yellow);color:#333">3</div>
+        <div class="sbody">
+          <h4 class="en">Dividend ten's digit GREATER than divisor → Skip needed</h4>
+          <h4 class="kn">ಹತ್ತರ ಸ್ಥಾನ ಭಾಜ್ಯ ಭಾಜಕಕ್ಕಿಂತ ದೊಡ್ಡದಾದರೆ → ಸ್ಕಿಪ್ ಬೇಕು</h4>
+          <p class="en">If dividend's ten's place digit is GREATER than divisor → skip one rod, start from ten's place column</p>
+          <p class="kn">ಹತ್ತರ ಸ್ಥಾನದ ಭಾಜ್ಯ ಭಾಜಕಕ್ಕಿಂತ ದೊಡ್ಡದಾದರೆ → ಒಂದು ರಾಡ್ ಸ್ಕಿಪ್ ಮಾಡಿ ಹತ್ತರ ಸ್ಥಾನದ ಕಾಲಮ್‌ನಿಂದ ಶುರು</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="div"></div>
+
+  <!-- EXAMPLE 1: 12 ÷ 2 -->
+  <div class="ebox" style="--bc:#E63946">
+    <div class="etitle">🍎 <span class="en">Example 1: 12 ÷ 2 = 6</span><span class="kn">ಉದಾಹರಣೆ 1: 12 ÷ 2 = 6</span></div>
+
+    <div class="gc" style="margin-bottom:12px">
+      <p class="en"><b>Step 0 — Rod Fixing Formula:</b><br>
+      Digits in dividend (12) = <span class="hl">2</span> &nbsp;|&nbsp; Digits in divisor (2) = <span class="hl">1</span><br>
+      Starting column = 2 − 1 + 1 = <span class="hl-g">2nd column from right of middle pointer</span></p>
+      <p class="kn"><b>ಹಂತ 0 — ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಸೂತ್ರ:</b><br>
+      ಭಾಜ್ಯ (12) ಅಂಕಿ = <span class="hl">2</span> &nbsp;|&nbsp; ಭಾಜಕ (2) ಅಂಕಿ = <span class="hl">1</span><br>
+      ಶುರು ಕಾಲಮ್ = 2 − 1 + 1 = <span class="hl-g">ಮಧ್ಯ ಸೂಚಿಯ ಬಲದ 2ನೇ ಕಾಲಮ್</span></p>
+    </div>
+
+    <div class="crow"><div class="cnum" style="background:var(--red)">1</div>
+      <div class="ctext en">Ten's place: 1 ÷ 2<br><b>1 is smaller than 2 (divisor)</b> → Rod fixing answer = <b>0</b><br>So add dividend number (1) on <b>right side of middle pointer (Units)</b></div>
+      <div class="ctext kn">ಹತ್ತರ ಸ್ಥಾನ: 1 ÷ 2<br><b>1 < 2 (ಭಾಜಕ)</b> → ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಉತ್ತರ = <b>0</b><br>ಭಾಜ್ಯ (1) ಅನ್ನು <b>ಮಧ್ಯ ಸೂಚಿಯ ಬಲ (ಒಂದರ ಸ್ಥಾನ)</b>ದಲ್ಲಿ ಸೇರಿಸಿ</div>
+      <div class="cres">0 → skip rod</div>
+    </div>
+    <div class="crow"><div class="cnum" style="background:var(--orange)">2</div>
+      <div class="ctext en">Now dividend at ten's = 1, at units = 2 → Combined = <b>12</b><br>12 ÷ 2 = <b>6</b> → Rod fixing answer = <b>1</b><br>Add divisor (2) on <b>house pointer</b> (middle). After: abacus shows 6 remainder 0</div>
+      <div class="ctext kn">ಹತ್ತರ = 1, ಒಂದರ = 2 → ಸಂಯೋಜಿತ = <b>12</b><br>12 ÷ 2 = <b>6</b> → ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಉತ್ತರ = <b>1</b><br>ಭಾಜಕ (2) ಅನ್ನು <b>ಹೌಸ್ ಪಾಯಿಂಟರ್</b>ನಲ್ಲಿ ಸೇರಿಸಿ. ನಂತರ: ಅಬ್ಯಾಕಸ್ 6 ತೋರಿಸ್ತದೆ</div>
+      <div class="cres">6 remainder 0</div>
+    </div>
+
+    <div class="abox">
+      <div class="albl en">✅ Answer</div><div class="albl kn">✅ ಉತ್ತರ</div>
+      <div class="anum">12 ÷ 2 = 🎉 6</div>
+    </div>
+  </div>
+
+  <!-- EXAMPLE 2: 36 ÷ 3 -->
+  <div class="ebox" style="--bc:#06D6A0; background:rgba(6,214,160,.07)">
+    <div class="etitle">🍊 <span class="en">Example 2: 36 ÷ 3 = 12</span><span class="kn">ಉದಾಹರಣೆ 2: 36 ÷ 3 = 12</span></div>
+    <div class="gc" style="margin-bottom:12px">
+      <p class="en"><b>Rod Fixing:</b> Digits(36)=2, Digits(3)=1 → Start col = <span class="hl-g">2</span><br>
+      Ten's digit of 36 = 3 → 3 ≥ 3 (divisor) → <b>Skip rod needed</b><br>
+      Go to ten's column directly.</p>
+      <p class="kn"><b>ರಾಡ್ ಫಿಕ್ಸಿಂಗ್:</b> ಅಂಕಿ(36)=2, ಅಂಕಿ(3)=1 → ಶುರು = <span class="hl-g">2</span><br>
+      36 ರ ಹತ್ತರ ಅಂಕಿ = 3 → 3 ≥ 3 (ಭಾಜಕ) → <b>ರಾಡ್ ಸ್ಕಿಪ್ ಬೇಕು</b></p>
+    </div>
+    <div class="crow"><div class="cnum" style="background:var(--green)">1</div>
+      <div class="ctext en">3 ÷ 3 = 1 → Answer = <b>1</b> (rod fixing = 1 → house pointer)<br>Remove 3 (divisor), remainder = 0. Bring down units digit 6.</div>
+      <div class="ctext kn">3 ÷ 3 = 1 → ಉತ್ತರ = <b>1</b> (ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ = 1 → ಹೌಸ್ ಪಾಯಿಂಟರ್)<br>ಭಾಜಕ (3) ತೆಗೆ, ಉಳಿಕೆ = 0. ಒಂದರ ಅಂಕಿ 6 ತಂದು.</div>
+      <div class="cres">1 × 3 = 3</div>
+    </div>
+    <div class="crow"><div class="cnum" style="background:var(--teal)">2</div>
+      <div class="ctext en">6 ÷ 3 = 2 → Answer = <b>2</b> (rod fixing = 2 → right of house)<br>Remove 6 (2×3), remainder = 0.</div>
+      <div class="ctext kn">6 ÷ 3 = 2 → ಉತ್ತರ = <b>2</b> (ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ = 2 → ಹೌಸ್ ಬಲ)<br>6 (2×3) ತೆಗೆ, ಉಳಿಕೆ = 0.</div>
+      <div class="cres">2 × 3 = 6</div>
+    </div>
+    <div class="abox"><div class="albl en">✅ Answer</div><div class="albl kn">✅ ಉತ್ತರ</div><div class="anum">36 ÷ 3 = 🎉 12</div></div>
+  </div>
+
+  <!-- EXAMPLE 3: 48 ÷ 4 -->
+  <div class="ebox" style="--bc:#3A86FF; background:rgba(58,134,255,.07)">
+    <div class="etitle">🫐 <span class="en">Example 3: 48 ÷ 4 = 12</span><span class="kn">ಉದಾಹರಣೆ 3: 48 ÷ 4 = 12</span></div>
+    <div class="gc" style="margin-bottom:12px">
+      <p class="en"><b>Rod Fixing:</b> Digits(48)=2, Digits(4)=1 → Start col = 2<br>Ten's digit = 4 ≥ 4 (divisor) → Skip rod!</p>
+      <p class="kn"><b>ರಾಡ್ ಫಿಕ್ಸಿಂಗ್:</b> ಅಂಕಿ(48)=2, ಅಂಕಿ(4)=1 → ಶುರು = 2<br>ಹತ್ತರ ಅಂಕಿ = 4 ≥ 4 → ರಾಡ್ ಸ್ಕಿಪ್!</p>
+    </div>
+    <div class="crow"><div class="cnum" style="background:var(--blue)">1</div>
+      <div class="ctext en">4 ÷ 4 = 1 → Write 1 on house pointer. Remove 4.</div>
+      <div class="ctext kn">4 ÷ 4 = 1 → ಹೌಸ್ ಪಾಯಿಂಟರ್‌ನಲ್ಲಿ 1 ಬರೆ. 4 ತೆಗೆ.</div>
+      <div class="cres">1 × 4 = 4</div>
+    </div>
+    <div class="crow"><div class="cnum" style="background:var(--purple)">2</div>
+      <div class="ctext en">8 ÷ 4 = 2 → Write 2 on right of house. Remove 8.</div>
+      <div class="ctext kn">8 ÷ 4 = 2 → ಹೌಸ್ ಬಲಭಾಗದಲ್ಲಿ 2 ಬರೆ. 8 ತೆಗೆ.</div>
+      <div class="cres">2 × 4 = 8</div>
+    </div>
+    <div class="abox"><div class="albl en">✅ Answer</div><div class="albl kn">✅ ಉತ್ತರ</div><div class="anum">48 ÷ 4 = 🎉 12</div></div>
+  </div>
+
+  <!-- EXAMPLE 4: 75 ÷ 5 (skip rod) -->
+  <div class="ebox" style="--bc:#A855F7; background:rgba(168,85,247,.07)">
+    <div class="etitle">🍇 <span class="en">Example 4: 75 ÷ 5 = 15</span><span class="kn">ಉದಾಹರಣೆ 4: 75 ÷ 5 = 15</span></div>
+    <div class="gc" style="margin-bottom:12px">
+      <p class="en"><b>Rod Fixing:</b> Digits(75)=2, Digits(5)=1 → Start col=2<br>Ten's digit of 75 = 7 > 5 (divisor) → Skip rod from ten's column</p>
+      <p class="kn"><b>ರಾಡ್ ಫಿಕ್ಸಿಂಗ್:</b> ಅಂಕಿ(75)=2, ಅಂಕಿ(5)=1 → ಶುರು=2<br>75 ರ ಹತ್ತರ ಅಂಕಿ 7 > 5 → ಹತ್ತರ ಕಾಲಮ್‌ನಿಂದ ರಾಡ್ ಸ್ಕಿಪ್</p>
+    </div>
+    <div class="crow"><div class="cnum" style="background:#A855F7">1</div>
+      <div class="ctext en">7 ÷ 5 = 1 remainder 2 → Write 1, remainder 2 stays. Bring down 5.</div>
+      <div class="ctext kn">7 ÷ 5 = 1 ಉಳಿಕೆ 2 → 1 ಬರೆ, 2 ಉಳಿಕೆ. 5 ತಂದು.</div>
+      <div class="cres">1 r2 → 25</div>
+    </div>
+    <div class="crow"><div class="cnum" style="background:var(--pink)">2</div>
+      <div class="ctext en">25 ÷ 5 = 5 → Write 5 on next column. Remove 25.</div>
+      <div class="ctext kn">25 ÷ 5 = 5 → ಮುಂದಿನ ಕಾಲಮ್‌ನಲ್ಲಿ 5 ಬರೆ. 25 ತೆಗೆ.</div>
+      <div class="cres">5 × 5 = 25</div>
+    </div>
+    <div class="abox"><div class="albl en">✅ Answer</div><div class="albl kn">✅ ಉತ್ತರ</div><div class="anum">75 ÷ 5 = 🎉 15</div></div>
+  </div>
+
+  <!-- QUICK REFERENCE TABLE -->
+  <div class="gc">
+    <h2>📊 <span class="en">Rod Fixing Answer Quick Reference</span><span class="kn">ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಉತ್ತರ ತ್ವರಿತ ಉಲ್ಲೇಖ</span></h2>
+    <div class="ptable">
+      <table>
+        <thead><tr>
+          <th class="en">Rod Fixing Answer</th><th class="kn">ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಉತ್ತರ</th>
+          <th class="en">Where to add Dividend</th><th class="kn">ಭಾಜ್ಯ ಎಲ್ಲಿ ಸೇರಿಸಬೇಕು</th>
+          <th class="en">Column Name</th><th class="kn">ಕಾಲಮ್ ಹೆಸರು</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="act">0</td><td class="en">Right of middle pointer</td><td class="kn">ಮಧ್ಯ ಸೂಚಿಯ ಬಲ</td><td class="en">Units (U)</td><td class="kn">ಒಂದರ ಸ್ಥಾನ</td></tr>
+          <tr><td class="act" style="color:var(--green)">1</td><td class="en">On middle pointer</td><td class="kn">ಮಧ್ಯ ಸೂಚಿ ಮೇಲೆ</td><td class="en">House Pointer</td><td class="kn">ಹೌಸ್ ಪಾಯಿಂಟರ್</td></tr>
+          <tr><td class="act" style="color:var(--blue)">2</td><td class="en">Left of middle pointer</td><td class="kn">ಮಧ್ಯ ಸೂಚಿಯ ಎಡ</td><td class="en">Tens (T)</td><td class="kn">ಹತ್ತರ ಸ್ಥಾನ</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end learn -->
+
+<!-- ═══════════ ABACUS TAB ═══════════ -->
+<div id="tab-abacus" class="tab-panel">
+  <div class="abacus-wrap">
+    <div class="abacus-outer">
+      <div class="abacus-inner">
+        <div class="a-rail"></div>
+        <div class="col-names" id="col-names"></div>
+        <div class="a-body">
+          <div class="a-bar"></div>
+          <div class="a-cols" id="a-cols"></div>
+        </div>
+        <div class="a-rail"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-vals-bar" id="cvb"></div>
+  <div class="ptr-labels" id="ptrl"></div>
+  <div class="total-row">
+    <div class="total-box">
+      <div class="tlbl en">CURRENT VALUE</div><div class="tlbl kn">ಪ್ರಸ್ತುತ ಮೌಲ್ಯ</div>
+      <div class="tnum" id="tnum">0</div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <input class="ni" type="number" id="set-inp" placeholder="0–9999999">
+    <button class="btn primary" onclick="setNumber()"><span class="en">Set</span><span class="kn">ಹೊಂದಿಸು</span></button>
+    <button class="btn" onclick="clearAbacus()"><span class="en">Clear</span><span class="kn">ಅಳಿಸು</span></button>
+    <button class="btn" onclick="randomNum()"><span class="en">Random</span><span class="kn">ಯಾದೃಚ್ಛಿಕ</span></button>
+  </div>
+</div>
+
+<!-- ═══════════ PRACTICE TAB ═══════════ -->
+<div id="tab-practice" class="tab-panel">
+  <div class="pa">
+    <div class="sc-row">
+      <div class="scb"><div class="sn" id="sc-c">0</div><div class="sl en">CORRECT</div><div class="sl kn">ಸರಿ</div></div>
+      <div class="scb"><div class="sn" id="sc-t">0</div><div class="sl en">TOTAL</div><div class="sl kn">ಒಟ್ಟು</div></div>
+      <div class="scb"><div class="sn" id="sc-p">—</div><div class="sl en">ACCURACY</div><div class="sl kn">ನಿಖರತೆ</div></div>
+    </div>
+    <div class="diff-row">
+      <button class="dbtn active" id="d-e" onclick="setDiff('easy',this)">⭐ <span class="en">Easy</span><span class="kn">ಸುಲಭ</span></button>
+      <button class="dbtn" id="d-m" onclick="setDiff('med',this)">⭐⭐ <span class="en">Medium</span><span class="kn">ಮಧ್ಯಮ</span></button>
+      <button class="dbtn" id="d-h" onclick="setDiff('hard',this)">⭐⭐⭐ <span class="en">Hard</span><span class="kn">ಕಷ್ಟ</span></button>
+    </div>
+    <div class="pcard">
+      <div class="plbl en">SOLVE ON YOUR ABACUS, THEN ENTER ANSWER</div>
+      <div class="plbl kn">ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ಲೆಕ್ಕ ಮಾಡಿ, ಉತ್ತರ ನಮೂದಿಸಿ</div>
+      <div class="peq" id="peq"><span class="en">Press "New Problem"</span><span class="kn">"ಹೊಸ ಪ್ರಶ್ನೆ" ಒತ್ತಿರಿ</span></div>
+      <div class="hintbox" id="hintbox" style="display:none"></div>
+      <div class="ar">
+        <input class="ai" id="ai" type="number" placeholder="?">
+        <button class="chkbtn" onclick="checkAns()"><span class="en">Check ✓</span><span class="kn">ಪರೀಕ್ಷಿಸು ✓</span></button>
+      </div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <div class="ctrl-row">
+      <button class="btn green" onclick="newProblem()"><span class="en">New Problem</span><span class="kn">ಹೊಸ ಪ್ರಶ್ನೆ</span></button>
+      <button class="btn" onclick="showHint()"><span class="en">💡 Hint</span><span class="kn">💡 ಸೂಚನೆ</span></button>
+      <button class="btn red" onclick="resetScore()"><span class="en">Reset</span><span class="kn">ಮರುಹೊಂದಿಸು</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ STEP BY STEP TAB ═══════════ -->
+<div id="tab-stepbystep" class="tab-panel">
+  <div class="pa">
+    <div class="pcard" style="max-width:580px;width:100%">
+      <div class="plbl en">ENTER A DIVISION PROBLEM (divisor 1–9)</div>
+      <div class="plbl kn">ಭಾಗಾಕಾರ ಸಮಸ್ಯೆ ನಮೂದಿಸಿ (ಭಾಜಕ 1–9)</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;align-items:center;">
+        <input class="ni" id="sbs-a" type="number" placeholder="e.g. 75" min="1" max="9999" style="width:120px">
+        <span style="font-size:26px;color:var(--gold)">÷</span>
+        <input class="ni" id="sbs-b" type="number" placeholder="1–9" min="1" max="9" style="width:80px">
+        <button class="btn primary" onclick="solveStepByStep()"><span class="en">Solve!</span><span class="kn">ಬಿಡಿಸಿ!</span></button>
+      </div>
+    </div>
+    <div class="sbsp" id="sbs-panel" style="display:none">
+      <h3 id="sbs-title">—</h3>
+      <div class="slist" id="sbs-list"></div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+        <button class="btn" onclick="sbsMove(-1)"><span class="en">◀ Prev</span><span class="kn">◀ ಹಿಂದೆ</span></button>
+        <button class="btn primary" onclick="sbsMove(1)"><span class="en">Next ▶</span><span class="kn">ಮುಂದೆ ▶</span></button>
+        <button class="btn green" onclick="sbsApply()"><span class="en">▶ Show on Abacus</span><span class="kn">▶ ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ತೋರಿಸಿ</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ftr">
+  🧮 <span class="en">Division Master!</span><span class="kn">ಭಾಗಾಕಾರ ಮಾಸ್ಟರ್!</span>
+  <p class="en">Rod Fix → Find start col → Divide digit by digit → Add divisor last → Read answer!</p>
+  <p class="kn">ರಾಡ್ ಫಿಕ್ಸ್ → ಕಾಲಮ್ ಹುಡುಕು → ಅಂಕಿ ಅಂಕಿ ಭಾಗಿಸು → ಕೊನೆಗೆ ಭಾಜಕ ಸೇರಿಸು → ಉತ್ತರ ಓದು!</p>
+</div>
+
+</div><!-- .page -->
+
+<script>
+// ══════ ABACUS ENGINE ══════
+const NC=7;
+const EN_NAMES=['Ten-Lakhs','Lakhs','Ten-Thou','Thou','Hundreds','Tens','Units'];
+const KN_NAMES=['ಹ.ಲಕ್ಷ','ಲಕ್ಷ','ಹ.ಸಾ','ಸಾ','ನೂ','ಹ','ಒ'];
+const SHORTS=['TL','L','TTH','TH','H','T','U'];
+const PV=[1000000,100000,10000,1000,100,10,1];
+const MIDDLE_COL=3; // 0-indexed, column 3 is "Thou" = middle pointer area
+
+// bar top = 99px (11 pad + 88 upper zone)
+// Upper: rest=50, active=72
+// Lower b=0: rest=128,act=114; b=1: rest=158,act=144; b=2: rest=188,act=174; b=3: rest=218,act=204
+const UR=50,UA=72;
+const LR=[128,158,188,218],LA=[114,144,174,204];
+
+let state=Array.from({length:NC},()=>({upper:0,lower:0}));
+let lang='en';
+
+function buildAbacus(){
+  // col names
+  const cn=document.getElementById('col-names');
+  if(!cn)return;
+  cn.innerHTML='';
+  for(let c=0;c<NC;c++){
+    const d=document.createElement('div');
+    d.className='cn';
+    d.innerHTML=`<span class="en">${EN_NAMES[c]}<br><small>${SHORTS[c]}</small></span><span class="kn">${KN_NAMES[c]}<br><small>${SHORTS[c]}</small></span>`;
+    cn.appendChild(d);
+  }
+  // cols
+  const cols=document.getElementById('a-cols');
+  cols.innerHTML='';
+  for(let c=0;c<NC;c++){
+    const col=document.createElement('div');
+    col.className='acol'+(c===MIDDLE_COL?' is-pointer':'');
+    col.id='col-'+c;
+    // upper bead
+    const ub=document.createElement('div');
+    ub.className='bead upper'+(state[c].upper?'':' off');
+    ub.style.top=(state[c].upper?UA:UR)+'px';
+    ub.addEventListener('click',()=>{state[c].upper^=1;buildAbacus();});
+    col.appendChild(ub);
+    // lower beads
+    for(let b=0;b<4;b++){
+      const a=b<state[c].lower;
+      const lb=document.createElement('div');
+      lb.className='bead lower'+(a?'':' off');
+      lb.style.top=(a?LA[b]:LR[b])+'px';
+      lb.addEventListener('click',()=>{
+        state[c].lower=(b<state[c].lower)?b:b+1;
+        buildAbacus();
+      });
+      col.appendChild(lb);
+    }
+    cols.appendChild(col);
+  }
+  updateInfo();
+}
+
+function updateInfo(){
+  const cvb=document.getElementById('cvb');
+  const ptrl=document.getElementById('ptrl');
+  if(!cvb)return;
+  cvb.innerHTML='';ptrl.innerHTML='';
+  let total=0;
+  for(let c=0;c<NC;c++){
+    const d=state[c].upper*5+state[c].lower;
+    total+=d*PV[c];
+    const cv=document.createElement('div');
+    cv.className='cv'+(d?' nz':' zr');
+    cv.textContent=d;
+    cvb.appendChild(cv);
+    const pl=document.createElement('div');
+    pl.className='pl'+(c===MIDDLE_COL?' is-ptr':'');
+    pl.textContent=c===MIDDLE_COL?'▲ Middle':'';
+    ptrl.appendChild(pl);
+  }
+  const tn=document.getElementById('tnum');
+  if(tn)tn.textContent=total.toLocaleString('en-IN');
+}
+
+function clearAbacus(){
+  state=Array.from({length:NC},()=>({upper:0,lower:0}));
+  buildAbacus();
+}
+
+function setFromNum(n){
+  const pv=PV;
+  let rem=Math.max(0,Math.min(9999999,Math.round(n)));
+  for(let c=0;c<NC;c++){
+    const d=Math.floor(rem/pv[c]);rem%=pv[c];
+    state[c].upper=d>=5?1:0;
+    state[c].lower=d>=5?d-5:d;
+  }
+  buildAbacus();
+}
+
+function setNumber(){const n=parseInt(document.getElementById('set-inp').value);if(!isNaN(n))setFromNum(n);}
+function randomNum(){const n=~~(Math.random()*999)+10;document.getElementById('set-inp').value=n;setFromNum(n);}
+
+function highlightCols(cols,type='hi'){
+  document.querySelectorAll('.bead').forEach(b=>b.classList.remove('hi','hi-red'));
+  if(cols===null)return;
+  cols.forEach(c=>{
+    const colEl=document.getElementById('col-'+c);
+    if(colEl)colEl.querySelectorAll('.bead:not(.off)').forEach(b=>b.classList.add(type));
+  });
+}
+
+// ══════ PRACTICE ══════
+let curAns=null,curA=0,curB=0,correct=0,total=0,diff='easy';
+
+function setDiff(d,btn){
+  diff=d;
+  document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function newProblem(){
+  let a,b;
+  const divisors=[2,3,4,5,6,7,8,9];
+  if(diff==='easy'){b=divisors[~~(Math.random()*4)];a=b*(~~(Math.random()*9)+1);}
+  else if(diff==='med'){b=divisors[~~(Math.random()*6)];a=b*(~~(Math.random()*19)+2);}
+  else{b=divisors[~~(Math.random()*8)];a=b*(~~(Math.random()*99)+10);}
+  curA=a;curB=b;curAns=a/b;
+  document.getElementById('peq').innerHTML=`${a} <span class="op">÷</span> ${b} <span class="op">=</span> <span style="color:var(--yellow)">?</span>`;
+  document.getElementById('ai').value='';
+  document.getElementById('fb').textContent='';
+  document.getElementById('fb').className='fb';
+  document.getElementById('hintbox').style.display='none';
+  document.getElementById('ai').focus();
+  clearAbacus();
+}
+
+function showHint(){
+  if(!curAns)return;
+  const a=curA,b=curB;
+  const dLen=a.toString().length;
+  const vLen=b.toString().length;
+  const startCol=dLen-vLen+1;
+  const tenDig=Math.floor(a/10);
+  const skip=tenDig>=b;
+  let html='';
+  if(lang==='en'){
+    html=`<b>Rod Fixing Formula:</b> Digits in dividend (${a}) = ${dLen}, Divisor (${b}) digits = ${vLen}<br>
+    Starting column = ${dLen} − ${vLen} + 1 = <b>${startCol}</b><br>
+    Ten's digit = ${tenDig} ${skip?'≥':'<'} ${b} → ${skip?'<b>Skip rod needed!</b>':'<b>No skip needed</b>'}<br>
+    <b>Answer = ${a/b}</b>`;
+  } else {
+    html=`<b>ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಸೂತ್ರ:</b> ಭಾಜ್ಯ (${a}) ಅಂಕಿ = ${dLen}, ಭಾಜಕ (${b}) ಅಂಕಿ = ${vLen}<br>
+    ಶುರು ಕಾಲಮ್ = ${dLen} − ${vLen} + 1 = <b>${startCol}</b><br>
+    ಹತ್ತರ ಅಂಕಿ = ${tenDig} ${skip?'≥':'<'} ${b} → ${skip?'<b>ರಾಡ್ ಸ್ಕಿಪ್ ಬೇಕು!</b>':'<b>ರಾಡ್ ಸ್ಕಿಪ್ ಬೇಡ</b>'}<br>
+    <b>ಉತ್ತರ = ${a/b}</b>`;
+  }
+  const hb=document.getElementById('hintbox');
+  hb.innerHTML=html;hb.style.display='block';
+}
+
+function checkAns(){
+  if(!curAns){newProblem();return;}
+  const u=parseInt(document.getElementById('ai').value);
+  if(isNaN(u)){document.getElementById('fb').textContent=lang==='en'?'Enter a number first!':'ಮೊದಲು ಸಂಖ್ಯೆ ನಮೂದಿಸಿ!';return;}
+  total++;
+  const fb=document.getElementById('fb');
+  if(u===curAns){
+    correct++;
+    fb.textContent=lang==='en'?'✓ Correct! Amazing! 🎉':'✓ ಸರಿಯಾಗಿದೆ! ಅದ್ಭುತ! 🎉';
+    fb.className='fb ok';
+    setTimeout(newProblem,1500);
+  } else {
+    fb.textContent=lang==='en'?`✗ Try again! Answer is ${curAns}. Use the hint!`:`✗ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ! ಉತ್ತರ ${curAns}. ಸೂಚನೆ ನೋಡಿ!`;
+    fb.className='fb no';
+  }
+  document.getElementById('sc-c').textContent=correct;
+  document.getElementById('sc-t').textContent=total;
+  document.getElementById('sc-p').textContent=total?Math.round(correct/total*100)+'%':'—';
+}
+
+function resetScore(){
+  correct=0;total=0;curAns=null;
+  ['sc-c','sc-t'].forEach(id=>document.getElementById(id).textContent=0);
+  document.getElementById('sc-p').textContent='—';
+  document.getElementById('fb').textContent='';
+  document.getElementById('hintbox').style.display='none';
+  document.getElementById('peq').innerHTML=lang==='en'?'Press "New Problem"':'"ಹೊಸ ಪ್ರಶ್ನೆ" ಒತ್ತಿರಿ';
+}
+
+document.getElementById('ai').addEventListener('keydown',e=>{if(e.key==='Enter')checkAns();});
+
+// ══════ STEP BY STEP ══════
+let sbsSteps=[],sbsCur=0;
+
+function solveStepByStep(){
+  const a=parseInt(document.getElementById('sbs-a').value);
+  const b=parseInt(document.getElementById('sbs-b').value);
+  if(isNaN(a)||isNaN(b)||b<1||b>9||a<b){
+    alert(lang==='en'?'Enter valid numbers (dividend ≥ divisor, divisor 1–9)':'ಸರಿಯಾದ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ');return;
+  }
+  sbsSteps=[];sbsCur=0;
+  const dStr=a.toString();
+  const dLen=dStr.length;
+  const vLen=b.toString().length;
+  const startColNum=dLen-vLen+1;
+  const tenDig=dLen>1?parseInt(dStr[0]):a;
+  const skip=tenDig>=b;
+
+  // Setup
+  sbsSteps.push({
+    en:`📋 <b>Setup: ${a} ÷ ${b}</b><br>Digits in dividend = <b>${dLen}</b> | Digits in divisor = <b>${vLen}</b><br>Starting column = ${dLen}−${vLen}+1 = <b>${startColNum}</b><br>Ten's digit (${tenDig}) ${skip?'≥':'<'} divisor (${b}) → ${skip?'<b>Skip rod!</b>':'<b>No skip needed</b>'}`,
+    kn:`📋 <b>ಸಿದ್ಧತೆ: ${a} ÷ ${b}</b><br>ಭಾಜ್ಯ ಅಂಕಿ = <b>${dLen}</b> | ಭಾಜಕ ಅಂಕಿ = <b>${vLen}</b><br>ಶುರು ಕಾಲಮ್ = ${dLen}−${vLen}+1 = <b>${startColNum}</b><br>ಹತ್ತರ (${tenDig}) ${skip?'≥':'<'} ಭಾಜಕ (${b}) → ${skip?'<b>ರಾಡ್ ಸ್ಕಿಪ್!</b>':'<b>ರಾಡ್ ಸ್ಕಿಪ್ ಬೇಡ</b>'}`,
+    val:a,hiCols:[MIDDLE_COL]
+  });
+
+  // Division steps
+  let rem=a,q=Math.floor(a/b);
+  const digits=dStr.split('').map(Number);
+  let runQ='';
+  let running=0;
+  digits.forEach((d,i)=>{
+    running=running*10+d;
+    const qi=Math.floor(running/b);
+    const ri=running%b;
+    runQ+=qi;
+    sbsSteps.push({
+      en:`✖️ <b>Digit ${i+1}: ${running} ÷ ${b} = ${qi} remainder ${ri}</b><br>Write quotient digit <b>${qi}</b> on abacus.<br>Rod fixing answer = <b>${qi>1?2:qi}</b> → place on ${qi===0?'right of middle':qi===1?'middle pointer':'left of middle'}.<br>Subtract ${qi*b} from ${running}. Remainder = <b>${ri}</b>`,
+      kn:`✖️ <b>ಅಂಕಿ ${i+1}: ${running} ÷ ${b} = ${qi} ಉಳಿಕೆ ${ri}</b><br>ಅಬ್ಯಾಕಸ್‌ನಲ್ಲಿ ಭಾಗಲಬ್ಧ ಅಂಕಿ <b>${qi}</b> ಬರೆ.<br>ರಾಡ್ ಫಿಕ್ಸಿಂಗ್ ಉತ್ತರ = <b>${qi>1?2:qi}</b> → ${qi===0?'ಮಧ್ಯ ಬಲ':qi===1?'ಮಧ್ಯ ಸೂಚಿ':'ಮಧ್ಯ ಎಡ'}.<br>${running} ನಿಂದ ${qi*b} ತೆಗೆ. ಉಳಿಕೆ = <b>${ri}</b>`,
+      val:parseInt(runQ+'0'.repeat(digits.length-i-1)),
+      hiCols:[MIDDLE_COL-(i+1)]
+    });
+    running=ri;
+  });
+
+  sbsSteps.push({
+    en:`✅ <b>Final Answer: ${a} ÷ ${b} = ${q}${a%b!==0?' remainder '+(a%b):''}</b> 🎉<br>Read the quotient from the abacus columns!`,
+    kn:`✅ <b>ಅಂತಿಮ ಉತ್ತರ: ${a} ÷ ${b} = ${q}${a%b!==0?' ಉಳಿಕೆ '+(a%b):''}</b> 🎉`,
+    val:q,hiCols:null
+  });
+
+  document.getElementById('sbs-panel').style.display='block';
+  document.getElementById('sbs-title').textContent=`${a} ÷ ${b} = ${q}`;
+  renderSbs();
+  sbsApply();
+}
+
+function renderSbs(){
+  const list=document.getElementById('sbs-list');
+  list.innerHTML='';
+  const cols=['#E63946','#F4A261','#FFD93D','#06D6A0','#3A86FF','#8338EC','#FF6B9D'];
+  sbsSteps.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='si'+(i===sbsCur?' cur':i<sbsCur?' done':'');
+    el.innerHTML=`<div class="sin" style="background:${cols[i%cols.length]}">${i+1}</div>
+    <div class="stxt"><span class="en" style="display:${lang==='en'?'block':'none'}">${s.en}</span><span class="kn" style="display:${lang==='kn'?'block':'none'}">${s.kn}</span></div>`;
+    list.appendChild(el);
+  });
+  setTimeout(()=>{
+    const items=list.querySelectorAll('.si');
+    if(items[sbsCur])items[sbsCur].scrollIntoView({block:'nearest',behavior:'smooth'});
+  },50);
+}
+
+function sbsMove(dir){
+  sbsCur=Math.max(0,Math.min(sbsSteps.length-1,sbsCur+dir));
+  renderSbs();sbsApply();
+}
+
+function sbsApply(){
+  if(!sbsSteps.length)return;
+  const s=sbsSteps[sbsCur];
+  // Switch to abacus tab
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-abacus').classList.add('active');
+  document.querySelectorAll('.tab-btn')[1].classList.add('active');
+  setFromNum(s.val);
+  if(s.hiCols)setTimeout(()=>highlightCols(s.hiCols.filter(c=>c>=0&&c<NC)),200);
+  else highlightCols(null);
+}
+
+// ══════ LANG ══════
+function setLang(l){
+  lang=l;
+  const m=document.getElementById('main');
+  m.className=m.className.replace(/show-\w+/g,'').trim();
+  m.classList.add('show-'+l);
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('btn-kn').classList.toggle('active',l==='kn');
+  if(sbsSteps.length)renderSbs();
+}
+
+// ══════ TABS ══════
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// INIT
+buildAbacus();
+</script>
+</body>
+</html>
